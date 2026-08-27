@@ -16,6 +16,7 @@
 
 - Modify: `.gitignore`
 - Create: `pyproject.toml`
+- Create: `uv.lock`
 - Create: `README.md`
 - Create: `src/trend_signal_lab/__init__.py`
 - Create: `src/trend_signal_lab/dataset.py`

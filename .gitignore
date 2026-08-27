@@ -1,1 +1,11 @@
 .worktrees/
+
+# Local environments and disposable Python output.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Raw downloads and generated experiment output never belong in Git.
+data/raw/
+artifacts/
