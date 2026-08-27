@@ -27,3 +27,43 @@ generic and format terms, especially in current-share ranking. The three-way
 human usefulness labels (`specific cultural signal`, `generic/artifact`,
 `unclear`) have not been assigned, so the usefulness threshold is intentionally
 not declared passed or failed here.
+
+## Observed top 20
+
+Ranking A, current snapshot share:
+
+```text
+게임, ep., 오징어, 오징어 게임, the, sub, eng, official, bts, 이유,
+mv, 한국, squid game, game, vs, 친구, 스우파, nct, tv, my
+```
+
+Ranking B, smoothed change from the previous window:
+
+```text
+squid game, itzy, savage, loco, 에스, aespa, my universe, coldplay,
+오징어게임, 해외 반응, aespa 에스, 더듬이 tv, 안테나, 공범, 아이돌,
+이정재, the feels, 특집, 부부, 추석 맞이
+```
+
+## Provisional interpretation — 2026-08-28
+
+- The user judged Ranking B qualitatively strong and interesting. This is an
+  observation, not a final success classification.
+- Ranking A and B used the same input, yet B produced a much more period-specific
+  list. This suggests the temporal comparison contributes useful separation
+  inside the selected input.
+- The input already consists of videos selected by YouTube as trending. A live
+  hypothesis is therefore that upstream platform selection supplies much of the
+  signal and Ranking B primarily summarizes or reranks that curated pool.
+- E001 does not establish that Ranking B can discover trends from unfiltered
+  videos, general public text, or another source. It also does not measure how
+  much of its apparent quality comes from YouTube's selection.
+- A date-shuffle or random-window control was discussed as the smallest way to
+  observe whether B depends on real temporal order. It is only a candidate next
+  experiment and has not been approved or run.
+
+## Session close
+
+E001 is technically executed and reproducible. Its output is promising enough
+to continue thinking about, but the product and algorithm verdicts remain open.
+No follow-up experiment, new input, or implementation is approved at this point.
