@@ -26,3 +26,23 @@ Download the fixed dataset into the ignored raw-data directory with:
 ```sh
 uv run python scripts/download_e001_data.py
 ```
+
+## E001 result artifact
+
+Run the title-only baseline with:
+
+```sh
+uv run python scripts/run_e001.py \
+  --input data/raw/kr_youtube_trending_data.zip \
+  --output-dir artifacts/e001
+```
+
+The 2021-09-17–2021-10-16 current window contains 4,286 in-scope snapshots;
+the preceding 30-day window contains 4,040. The run applies Kiwi noun/proper-
+noun/foreign-token extraction, fixed stopwords, 1–3-grams, five-snapshot
+minimum support, current-share ranking, and smoothed log2 change ranking. The
+anchor (`오징어 게임`, `오징어게임`, or `squid game`) appears in both output
+top-20 lists. The generated lists are noisy and the human usefulness labels
+remain pending review; this is not a claim that the preregistered usefulness
+threshold passed. See [the experiment log](docs/experiment-log.md) and the
+ignored `artifacts/e001/results.{json,md}` files.
