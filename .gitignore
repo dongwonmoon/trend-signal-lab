@@ -4,6 +4,7 @@
 .venv/
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 
 # Raw downloads and generated experiment output never belong in Git.

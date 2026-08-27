@@ -63,17 +63,12 @@ def _csv_stream(source: Path, csv_name: str | None) -> Iterator[io.TextIOBase]:
         return
 
     with zipfile.ZipFile(source) as archive:
-        names = [name for name in archive.namelist() if name.lower().endswith(".csv")]
+        names = archive.namelist()
         canonical_name = "KR_youtube_trending_data.csv"
-        selected = csv_name or (
-            canonical_name
-            if canonical_name in names
-            else names[0]
-            if len(names) == 1
-            else None
-        )
-        if selected is None or selected not in archive.namelist():
-            raise ValueError(f"CSV member not found in ZIP: {csv_name or '<single CSV required>'}")
+        selected = csv_name or canonical_name
+        if selected not in names:
+            expected = csv_name or canonical_name
+            raise DatasetError(f"CSV member not found in ZIP: {expected}")
         with archive.open(selected, "r") as binary_stream:
             with io.TextIOWrapper(binary_stream, encoding="utf-8-sig", newline="") as text_stream:
                 yield text_stream
