@@ -315,3 +315,29 @@ E001의 고정 control은 그대로 둔다. 프로젝트에서 확인한 범위�
 > **C. NIKL 재검토:** 사용자가 승인 대기를 감수하기로 명시적으로 바꿀 때만 신청·이용약정 확인을 재개한다.
 
 그 승인 전에는 source rows를 결합하거나 early fusion을 구현하지 않는다.
+
+## 8. 공식 chronological feed의 최종 prospective qualification (2026-08-28, Asia/Seoul)
+
+### 8.1 확인 범위와 결론
+
+이번 추가 점검은 검색어 없이 최신 항목을 내놓는 **first-party Korean broadcaster/publisher RSS**만 대상으로 했다. 각 URL을 2026-08-28에 직접 요청해 XML의 실제 item, title, publication time, link/GUID, item 수를 확인했다. 결과적으로 historical backfill·pagination·권리 조건을 모두 공개한 공식 feed는 찾지 못했다. 그래도 E002의 최소 prospective metadata lens로는 SBS 연예 RSS 하나가 가장 작고 명확하다. 이는 매체가 편집해 노출한 연예 기사 목록이지, 비큐레이션 문화 모집단이 아니다.
+
+| 공식 후보 | live selection/feed와 실제 관찰 | ID·시간·history/refresh | robots·권리·판정 |
+|---|---|---|---|
+| **SBS 뉴스 연예 RSS (조건부 1순위)** | SBS가 공식 RSS 안내 페이지에서 연예 section URL을 직접 제공한다: [`SectionRssFeed.do?sectionId=14`](https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=14&plink=RSSREADER). 2026-08-28 live response는 channel `방송/연예 - SBS 뉴스 섹션`, 29 items였다. 실제 첫 항목은 “봉준호 감독 …” (`pubDate` 2026-08-28 13:20 KST), 다음은 “사랑의 하츄핑2 …” (11:53 KST)였다. | 각 item에 `title`, RFC 822 `pubDate`(+09:00), `link`, `guid`가 있고 link/GUID URL에 `news_id=N1008726731` 같은 stable native ID가 있다. 관찰된 29 items의 범위는 2026-08-26 18:43–08-28 13:20 KST(약 43시간)였다. feed에는 pagination/history cursor나 retention 보장이 없고 `<ttl>`도 관찰되지 않았다. **사실:** SBS 안내는 RSS를 업데이트된 뉴스 구독 수단으로 설명하지만, 과거 item 보존을 약속하지 않는다. | SBS `robots.txt`는 `/news/*` 및 RSS sitemap/section feed를 허용한다([공식 robots](https://news.sbs.co.kr/robots.txt)). 다만 공식 RSS 안내는 개인 이용자의 비상업적 사용만 허가하고 상업적 사용은 사전 문의하라고 명시한다([공식 RSS 안내](https://news.sbs.co.kr/news/rss.do)). **프로젝트 추론:** URL·timestamp·item rate가 가장 좋은 metadata-only dry-capture 후보지만, 이 이용 조건을 확인하기 전에는 자동 수집·저장을 승인된 것으로 간주하지 않는다. SBS의 editorial section selection도 보존해 기록한다. |
+| **조선닷컴 연예 RSS (대안)** | 조선닷컴 공식 RSS 안내의 연예 URL은 [`entertainments` feed](https://www.chosun.com/arc/outboundfeeds/rss/category/entertainments/?outputType=xml)다. live response는 100 items였고, 실제 첫 item은 “[사진]선재스님, 인자한 미소”, `pubDate` 2026-08-28 15:12 KST였다. | `title`, `link`, `guid isPermaLink=true`, `pubDate`, `description`/`content:encoded`, `dc:creator`가 있고 GUID URL은 `/entertainments/.../2026/08/28/<opaque-id>/` 형태다. 관찰된 100 items는 약 2026-08-28 11:26–15:12 KST(약 4시간)였으며 feed에 pagination/history cursor가 없다. channel `<ttl>1`은 있었지만 retention/backfill 계약은 아니다. | 공식 RSS 페이지는 RSS를 개인 PC 등 제한된 공간에서 개인 구독하는 용도로 한정하고, 상업 이용은 `rss@chosun.com` 문의 대상으로 둔다([공식 RSS 안내](https://rssplus.chosun.com/)). `robots.txt`는 일반 news 경로를 광범위하게 허용하지만([공식 robots](https://www.chosun.com/robots.txt)), robots 허용이 저작권/재사용 허가를 대체하지 않는다. **Disqualifier:** 짧은 history와 개인·비상업 조건, 그리고 현재 feed가 OSEN/스포츠조선 등 외부 제작자 항목도 섞는 editorial/syndication frame. |
+| **KBS WORLD Radio K-POP/연예 RSS (제외)** | KBS 공식 RSS 안내가 연예가 소식 feed URL을 제공한다: [`rss_enternews.htm?lang=k`](https://world.kbs.co.kr/rss/rss_enternews.htm?lang=k). live response는 `[KBS WORLD Radio] K-POP News`, 20 items였고 첫 제목은 “‘2관왕’ 아홉 …”, 두 번째는 “키키 …”였다. | `title`, `link`, `guid`, `author`, `enclosure`, `pubDate`가 있지만 관찰된 `pubDate`는 `2026-08-28`처럼 날짜 precision만 있고 시간대가 없다. 최신 20 items의 범위는 2026-08-27–08-28이었고 `<ttl>15`가 있었다. pagination/history endpoint는 보이지 않았다. | KBS는 RSS를 자동으로 최신 방송/뉴스 콘텐츠를 제공하는 서비스라고 설명하지만([공식 RSS 안내](https://world.kbs.co.kr/service/about_rss.htm?lang=k)), `world.kbs.co.kr/robots.txt`는 `User-agent: * Disallow: /`를 반환했다([공식 robots](https://world.kbs.co.kr/robots.txt)). **Disqualifier:** automated prospective collection의 robots 충돌, date-only timestamp, 20-item latest window. |
+
+### 8.2 선택과 최소 metadata contract
+
+**권고(조건부): SBS 연예 RSS 하나만 metadata-only dry capture 후보로 승인한다.** SBS는 공식 section endpoint, stable `news_id` link/GUID, 시간 단위 `pubDate`, 약 29 items/약 43시간의 관찰 가능한 rate를 제공해 KBS보다 평가 가능한 시간축을 갖고, 조선보다 현재 feed가 덜 짧은 window였다. 다만 이것은 “SBS가 편집한 연예 기사 selection”이라는 cross-source transfer lens이며, YouTube Trending처럼 platform curation을 제거한 모집단도 아니다. SBS의 개인·비상업 RSS 조건이 연구용 내부 저장을 허용하는지는 이 조사만으로 결정하지 않는다.
+
+승인될 경우 필요한 최소 보존 필드는 `source_feed_url`, 요청 시각(`collected_at`, timezone), RSS channel/build 정보, `title`, `pubDate`(+offset), `link`, `guid`, publisher/section, 그리고 원 response hash다. 이 목록은 수집 구현을 제안하는 것이 아니라, 같은 item의 재등장·누락·지연을 설명하기 위한 provenance 최소선이다. 본문·이미지·description은 저장하지 않고 title metadata만 보존하는 범위를 먼저 확인한다. feed item count와 보존 기간은 매 요청의 관찰값으로 기록하며, 29 items를 전체 SBS 연예 기사 수로 해석하지 않는다.
+
+### 8.3 남은 비결론과 E002 승인 gate
+
+- RSS feed가 chronological item을 제공한다는 사실은 해당 매체의 editorial selection을 제거하지 않는다. SBS/조선/KBS 모두 “문화 전체” 또는 “한국인의 관심 전체”의 unbiased frame이 아니다.
+- live item count, `<ttl>`, robots 허용은 historical retention·재현 가능한 backfill·원문/metadata 재사용권을 보장하지 않는다. 이 조사에서는 pagination, archive endpoint, feed 변경 이력도 확인되지 않았다.
+- SBS 연예 RSS와 E001 YouTube Trending의 overlap/lead-lag는 서로 다른 editorial/platform selection의 비교다. 이것만으로 문화적 중요도나 알고리즘 우열을 주장하지 않는다.
+
+따라서 E002 전에 사용자가 승인할 가장 작은 결정은 **“SBS 공식 연예 RSS를 title/timestamp/link/GUID/hash만 보존하는 비상업 metadata-only dry capture로 사용해도 되는가”**이다. 권리·이용조건 승인이 없으면 공식 feed도 second source로 채택하지 않고, NIKL 신청 또는 Naver prospective gate로 돌아간다. 어떠한 feed도 승인 전에는 source rows를 E001과 결합하지 않는다.
