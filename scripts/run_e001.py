@@ -74,7 +74,7 @@ def _eligible(form: str, tag: str) -> bool:
     normalized = _normalized_form(form)
     return (
         tag in ELIGIBLE_TAGS
-        and len(normalized) > 1
+        and normalized
         and normalized not in STOPWORDS
         and URL_FRAGMENT.search(normalized) is None
     )
@@ -85,17 +85,19 @@ def extract_candidates(title: str, kiwi: Kiwi | None = None) -> set[str]:
 
     analyzer = kiwi or Kiwi()
     candidates: set[str] = set()
-    run: list[str] = []
+    run: list[tuple[int, int]] = []
 
     def flush() -> None:
         for start in range(len(run)):
             for width in range(1, min(MAX_NGRAM, len(run) - start) + 1):
-                candidates.add(" ".join(run[start : start + width]))
+                surface = normalize_title(title)[run[start][0] : run[start + width - 1][1]]
+                if len(surface) > 1:
+                    candidates.add(_normalized_form(surface))
         run.clear()
 
     for token in analyzer.tokenize(normalize_title(title)):
         if _eligible(token.form, token.tag):
-            run.append(_normalized_form(token.form))
+            run.append((token.start, token.start + token.len))
         else:
             flush()
     flush()
@@ -112,8 +114,8 @@ def _phrase_preference(
     for term in terms:
         support = supports[term]
         if any(
-            len(longer.split()) > len(term.split())
-            and f" {term} " in f" {longer} "
+            len(longer) > len(term)
+            and term in longer
             and supports[longer]["current"] == support["current"]
             and supports[longer]["previous"] == support["previous"]
             for longer in supports
@@ -197,7 +199,7 @@ def rank_candidates(
         key=lambda row: (
             -row[mode],
             -row["current_snapshot_df"],
-            -len(row["candidate"].split()),
+            -len(row["candidate"]),
             row["candidate"],
         )
     )

@@ -46,3 +46,24 @@ top-20 lists. The generated lists are noisy and the human usefulness labels
 remain pending review; this is not a claim that the preregistered usefulness
 threshold passed. See [the experiment log](docs/experiment-log.md) and the
 ignored `artifacts/e001/results.{json,md}` files.
+
+## E002 SBS metadata baseline
+
+Run the source-local SBS entertainment backfill with an explicit completed-day
+endpoint:
+
+```sh
+uv run python scripts/run_e002_sbs.py --end-date 2026-08-28
+```
+
+The run covers that completed day and its preceding 29 days, compared with the
+immediately preceding 30 days. It retains only `title`, `published_at`,
+`news_id`, and `link`, deduplicated by `news_id`; article bodies, descriptions,
+and images are not fetched. Raw metadata stays under ignored `data/raw/`, and
+generated results under ignored `artifacts/e002_sbs/`.
+
+Ranking B reuses E001's candidate extraction, minimum support of five, and
+0.5-smoothed log2 share ratio. SBS unique-article support is not directly
+comparable with YouTube daily-snapshot support. This is an SBS editorial lens,
+not a representative measure of overall cultural attention, and no scores are
+combined across sources.

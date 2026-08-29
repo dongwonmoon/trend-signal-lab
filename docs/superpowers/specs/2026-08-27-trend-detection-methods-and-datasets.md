@@ -341,3 +341,22 @@ E001의 고정 control은 그대로 둔다. 프로젝트에서 확인한 범위�
 - SBS 연예 RSS와 E001 YouTube Trending의 overlap/lead-lag는 서로 다른 editorial/platform selection의 비교다. 이것만으로 문화적 중요도나 알고리즘 우열을 주장하지 않는다.
 
 따라서 E002 전에 사용자가 승인할 가장 작은 결정은 **“SBS 공식 연예 RSS를 title/timestamp/link/GUID/hash만 보존하는 비상업 metadata-only dry capture로 사용해도 되는가”**이다. 권리·이용조건 승인이 없으면 공식 feed도 second source로 채택하지 않고, NIKL 신청 또는 Naver prospective gate로 돌아간다. 어떠한 feed도 승인 전에는 source rows를 E001과 결합하지 않는다.
+
+### 8.4 후속 확인과 historical backfill 실행 (2026-08-29)
+
+위 RSS 조사 뒤 공식 SBS 연예 섹션의 날짜·페이지 목록을 다시 직접
+확인했다. `newsSection.do?pageDate=YYYYMMDD&pageIdx=N&sectionType=14`가 과거
+날짜별 기사 목록과 pagination을 반환하고, 목록 안의 Schema.org metadata가
+`headline`, timezone이 있는 `datePublished`, native `news_id` URL을 제공했다.
+따라서 24시간 prospective RSS 관찰보다 작은 경로로 historical metadata
+backfill을 선택했다. 이 확인은 8.1의 “historical endpoint를 찾지 못했다”는
+조사 상태를 갱신하지만, SBS가 history completeness나 retention을 공식
+보장한다는 뜻은 아니다.
+
+사용자는 본문·이미지·description을 제외하고 제목·발행시각·ID·링크만
+수집해 source-local Ranking B를 실행하는 범위를 승인했다. 2026-06-30부터
+2026-08-28까지 60일, 117페이지에서 844개 unique article을 얻었고 결과는
+`docs/experiment-log.md`에 기록했다. 이 실행은 SBS와 YouTube를 합치지 않으며,
+서로 다른 기간과 support unit 때문에 overlap·lead/lag·score magnitude 비교를
+하지 않는다. 기존 RSS dry-capture gate는 이 실행의 선행 조건이 아니며,
+prospective 운영 관찰이 필요해질 때만 다시 검토한다.

@@ -18,6 +18,15 @@ def test_extracts_korean_phrase_and_breaks_at_punctuation():
     assert "오징어 게임" not in extract_candidates("오징어, 게임 공식 예고편")
 
 
+def test_preserves_surface_spans_for_compound_nouns_and_keeps_boundaries():
+    candidates = extract_candidates("김부장 미니앨범 오징어 게임")
+    assert "김부장" in candidates
+    assert "미니앨범" in candidates
+    assert "오징어 게임" in candidates
+    assert "김 부장" not in candidates
+    assert "오징어 게임" not in extract_candidates("오징어, 게임")
+
+
 def test_candidate_ranking_counts_each_daily_snapshot_once():
     supports = {
         "지속 후보": {
