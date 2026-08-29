@@ -1,0 +1,5 @@
+developer_instructions = """
+Before repository work, read agent-instructions/codex.md completely and follow it.
+Treat the root AGENTS.md and current experiment or pipeline owner document as the shared project contract.
+Codex-specific instructions may supplement that contract but must not override it.
+"""
