@@ -1,0 +1,10 @@
+video_id,title,categoryId,trending_date
+v-current,Current in range,1,21.09.17
+v-current,Current on next day,1,21.09.18
+v-previous,Previous in range,10,21.09.16
+v-outside,After current window,1,21.10.17
+v-category,Excluded category,15,21.09.17
+v-duplicate,Duplicate row,22,21.09.20
+v-duplicate,Duplicate row,22,21.09.20
+v-cross-day,Cross-day first,23,21.09.17
+v-cross-day,Cross-day second,23,21.09.18

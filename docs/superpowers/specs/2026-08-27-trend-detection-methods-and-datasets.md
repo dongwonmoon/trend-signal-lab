@@ -176,3 +176,187 @@ NIST의 TDT 평가 개요는 topic detection, topic tracking, link detection, **
 - [Beomi/KcBERT 원 제작자 저장소](https://github.com/Beomi/KcBERT), raw collection 기간·정제·Kaggle 배포 설명, 접근일 2026-08-27.
 - [KcBERT Pre-Training Corpus — Kaggle](https://www.kaggle.com/datasets/junbumlee/kcbert-pretraining-corpus-korean-news-comments), uploader license/data card, 접근일 2026-08-27.
 - [Global News Dataset — Kaggle](https://www.kaggle.com/datasets/everydaycodings/global-news-dataset), NewsAPI provenance/license caveat, 접근일 2026-08-27.
+
+## 6. E002 두 번째 데이터 소스 선택 전의 확립된 관행 (2026-08-28, Asia/Seoul)
+
+### 6.1 용어와 융합 시점
+
+문헌에서 **early fusion**은 여러 입력의 원자료 또는 낮은 수준의 특징을 하나의 특징 공간으로 합친 뒤 공동 처리하는 방식(feature-level/raw-data fusion)이고, **late fusion**은 각 입력/모달리티를 별도로 처리한 뒤 의미 공간의 판정·점수·순위에서 결합하는 방식(decision-level/score-level fusion)이다. Snoek, Worring, Smeulders의 원 논문은 이 구분을 feature space 대 semantic space로 명시한다([Snoek et al., *Early versus Late Fusion in Semantic Video Analysis*](https://doi.org/10.1145/1101149.1101236), ACM Multimedia 2005). 다중 검색 결과의 점수/증거를 결합하는 관행도 TREC-2의 Fox–Shaw 실험에서 독립 검색 결과를 합치는 **data fusion**으로 다뤄졌다([Fox and Shaw, *Combination of Multiple Searches*](https://www.govinfo.gov/content/pkg/GOVPUB-C13-6a6b0268e3a4a50f5ac0652f0b8a50b3/pdf/GOVPUB-C13-6a6b0268e3a4a50f5ac0652f0b8a50b3.pdf)). 따라서 “두 API를 호출한다”는 것만으로 early/late fusion이 되는 것은 아니며, 실제 결합 지점을 기록해야 한다.
+
+| 선택 | 성립하려면 | 기대하는 정보/비용 | E002에서의 의미 |
+|---|---|---|---|
+| early/raw-data fusion | 두 소스의 기록을 같은 관측 단위·시간축·표현 공간으로 정렬하고, 누락/비동기/출처별 척도를 처리해야 한다. | 기록 사이의 상호작용을 직접 학습할 여지가 있지만, 한 소스의 형식·커버리지·결측이 공동 표현에 섞이고 source-specific 처리와 감사를 어렵게 한다. | 두 번째 소스가 E001과 동일한 의미의 기록·시간·텍스트를 제공한다는 것이 먼저 입증되기 전에는 선택하지 않는다. |
+| source-local processing → late fusion/comparison | 각 소스에서 독립적으로 후보·점수·근거를 만들고, 공통 후보/시간/평가 계약에서 결과를 비교한다. | 출처별 언어·선택 편향·결측을 보존하고 어느 소스가 무엇을 기여했는지 추적하기 쉽다. 소스 사이의 상호작용은 각 로컬 출력에서 사라질 수 있고 점수 척도 비교가 필요하다. | **첫 순서로 권고.** E001의 기존 결과를 통제군으로 유지하면서 두 번째 소스의 독립 신호, 겹침, 선행/지연을 관찰할 수 있다. 새로운 결합 규칙을 발명하지 않는다. |
+
+이 선택은 “late가 항상 우월하다”는 결론이 아니다. 원래의 비디오 실험도 late가 대부분 개념에서 약간 더 좋았지만 early가 이긴 개념에서는 차이가 더 컸다고 보고했으며([Snoek et al.](https://doi.org/10.1145/1101149.1101236)), 다중 모달 표현 학습의 원 실험은 모달리티가 학습·훈련·시험 중 언제 제공되는지를 별도 조건으로 구분했다([Ngiam et al., *Multimodal Deep Learning*](https://icml.cc/Conferences/2011/papers/399_icmlpaper.pdf), ICML 2011). 즉, 융합 성능은 과제의 정렬 수준, 소스의 가용 시점, 척도, 라벨에 의존한다.
+
+**E001에 확인된 사실:** 현재 4,286개와 직전 4,040개의 YouTube 트렌딩 snapshot, 1,078개 고유 영상(정확한 `(video_id, trending_date)` 중복 제거)을 사용했고, 같은 입력에서 Ranking B가 Ranking A보다 시기 특이적인 목록을 만들었다. Ranking B의 사용자 질적 평가는 긍정적이었지만 세 분류 human label은 아직 없으며, 데이터 자체가 이미 YouTube가 고른 트렌딩 목록이다. **이 조사에서의 추론:** B의 apparent quality 중 얼마가 랭킹 변화 신호이고 얼마가 YouTube의 upstream selection인지 E001만으로 분리할 수 없다. 따라서 E002의 첫 질문은 “결합 점수가 좋아지는가”가 아니라 “비선정 텍스트/다른 선택 메커니즘에서도 동일한 로컬 기준선이 재현되는가”여야 한다.
+
+### 6.2 표본 프레임과 prospective timestamped stream의 운영 관행
+
+두 번째 소스는 이름이나 다운로드 편의보다 먼저 **sampling frame**을 명시해야 한다. 즉, 무엇이 전체 모집단인지, 어떤 지역·언어·기간·카테고리·계정/매체가 포함되는지, 표본률·endpoint 제한·누락/삭제·갱신 주기가 무엇인지, 그리고 관측 가능한 범위가 시간에 따라 바뀌었는지를 기록한다. NIST TREC 2017 Real-Time Summarization은 Twitter public stream이 약 1% sample인 “spritzer”임을 명시하고, 평가 참가자가 같은 기간에 각자 live stream을 수집하도록 했다([NIST TREC 2017 RTS overview](https://trec.nist.gov/pubs/trec26/papers/Overview-RT.pdf), §§2.1, lines 69–100). 이는 1%가 보편적으로 충분하다는 근거가 아니라, 표본률과 실시간 수집 조건을 숨은 구현 세부가 아닌 평가 입력의 일부로 선언하는 사례다.
+
+prospective 수집에서는 최소한 다음을 raw 또는 변경 불가 manifest에 남긴다.
+
+- source-native stable ID, 원문/제목과 언어·분류, `published_at`/event time, `collected_at`/ingestion time, timezone과 timestamp precision;
+- 요청 시각, endpoint와 query/filter, 페이지 크기·page token/cursor, 응답의 next/previous token, rate/quota 오류, timeout·삭제·누락 기록;
+- source/API/data-set 버전, coverage와 update schedule, 원출처·license/terms, raw response 또는 그 해시, 수집 코드의 revision;
+- 동일 소스 내 exact duplicate/repost 규칙과, 소스 간에 동일 원문/항목으로 식별된 경우의 linkage 근거.
+
+이 체크리스트의 provenance·version·coverage 원칙은 W3C Data on the Web Best Practices가 원자료의 기원과 변경, version indicator/history, coverage를 제공하라고 한 권고에 근거한다([W3C DWBP](https://www.w3.org/TR/dwbp/), Best Practices 5, 7, 8, 28). W3C PROV-DM도 데이터 산출물을 entity, 그것을 만든 activity, 관여한 agent의 관계로 표현한다([W3C PROV-DM](https://www.w3.org/TR/prov-dm/)). endpoint·cursor·오류를 manifest에 남기는 구체적 형식은 이 원칙과 source API의 pagination 계약을 E002에 적용한 프로젝트 판단이지 W3C가 지정한 schema는 아니다. 거창한 provenance graph는 만들지 않되, 최소 manifest가 출처·수집 행위·산출물의 관계를 잃지 않게 한다.
+
+**event time과 collection time은 분리한다.** 예를 들어 YouTube 공식 문서는 `snippet.publishedAt`가 공개된 시각이며 업로드 시각과 다를 수 있다고 설명한다([YouTube video resource](https://developers.google.com/youtube/v3/docs/videos)). `search.list`의 `publishedAfter`/`publishedBefore`는 RFC 3339 필터이고, 응답의 `totalResults`는 근사치이므로 pagination은 `nextPageToken`/`prevPageToken`을 사용해야 한다([YouTube `search.list`](https://developers.google.com/youtube/v3/docs/search/list)). 따라서 E002의 historical replay는 가능한 한 source가 말하는 event/publication time으로 window를 자르고, collection time은 지연·재수집 분석에만 쓴다. source가 event time을 제공하지 않으면 “발견 시각”과 “사건 발생 시각”을 같은 것으로 부르지 않는다.
+
+중복은 **같은 source의 같은 관측**과 **서로 다른 source의 독립 확인**을 구분한다. E001처럼 native ID와 날짜가 있는 exact duplicate만 제거하되, 다른 날짜의 동일 영상은 지속성을 보존하기 위해 남긴다. E002에서 두 소스에 같은 기사·영상이 복제되어 있으면, linkage가 확인된 기록을 독립적인 두 번의 관심으로 세지 않는다. 반대로 동일 사건을 서로 다른 원출처가 보도했다는 사실은 그 자체로 “문화적 중요성”의 gold label이 아니다.
+
+### 6.3 cross-source trend/event 평가에서 이미 쓰이는 단위
+
+NIST의 Topic Detection and Tracking(TDT)은 서로 다른 broadcast/news 매체의 multilingual text를 대상으로 **topic tracking, link detection, topic detection, first story detection, story segmentation**을 별도 과제로 정의한다([Fiscus and Doddington, NIST TDT evaluation overview](https://www.nist.gov/publications/topic-detection-and-tracking-evaluation-overview)). E002에서 “trend detection”을 말할 때 최소한 다음 중 무엇을 측정하는지 고정해야 한다.
+
+| 평가 단위 | 확인할 것 | E001과의 관계 |
+|---|---|---|
+| record/document | 특정 시점에 후보가 맞는지, false alarm/miss가 무엇인지 | E001의 top-20 후보와 snapshot support는 이 단위의 일부 신호지만, record-level event label은 없다. |
+| event/topic cluster | 여러 기록이 같은 사건·현상을 가리키는지, follow-up 중복을 어떻게 처리하는지 | `오징어 게임` anchor는 알려진 역사 사례에 대한 sanity check일 뿐 cluster gold가 아니다. |
+| first appearance / lead–lag | 어느 source에서 먼저 관측되었는지, source latency가 얼마인지 | 두 번째 소스가 독립적인 조기 신호인지, 단지 YouTube 목록을 재진술하는지 판단하는 핵심이다. |
+| ranked output | top-k의 specific signal, generic/artifact, coverage 및 source contribution | E001의 기존 사용자 label 계약을 유지하되, 아직 label이 없으므로 성공 선언은 보류한다. |
+
+NIST evaluation cookbook은 과제, 핵심 metric, scoring protocol, train/development/evaluation corpus를 먼저 명시하고 metric을 과도하게 늘리지 말라고 권고한다([NIST Language Technology Evaluation Cookbook](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=150472), §§1–5). TDT 계열의 기본 관행은 detection을 miss와 false alarm의 trade-off로 보고, 한 operating point만으로 결론내리지 않는 것이다. E002에서는 새로운 정교한 detector를 도입하자는 뜻이 아니라, 적어도 고정 historical window에서 `top-k`, event/anchor coverage, first-observed source와 lead/lag, source별 false alarm/miss 사례를 같은 표에 남기자는 뜻이다.
+
+prospective stream 평가에는 **relevance/novelty/timeliness를 분리**하는 관행도 유용하다. NIST RTS는 quality(관련성·새로움)와 latency를 별도로 측정하고, latency를 원 tweet 또는 cluster의 첫 tweet 시각 기준으로 정의한다([NIST TREC 2017 RTS overview](https://trec.nist.gov/pubs/trec26/papers/Overview-RT.pdf), §§4–5). 또 같은 cluster의 후속 기록은 먼저 본 기록과 비교해 시간적으로 비대칭인 redundancy가 될 수 있다고 명시한다. 이를 E002에 옮길 때는 그대로 점수식을 복사하지 않고, (1) 후보가 당시 질문에 맞는지, (2) 이미 관측된 같은 사건의 재게시가 아닌지, (3) 첫 관측 이후 얼마나 늦었는지를 별도 열로 둔다. 이 세 가지를 하나의 임의 가중합으로 합치지 않는다.
+
+### 6.4 E002 source decision matrix
+
+| 항목 | 두 번째 소스가 **반드시 보존할 것** | E002에서 **의도적으로 달라야 할 것** | 판정/중단 조건 |
+|---|---|---|---|
+| 질문과 output | 한국어 문화 후보라는 범위, 역사 window, 후보명/근거를 읽을 수 있는 ranked output, E001의 A/B를 재현하는 기준선 | source-native text field와 upstream selection mechanism | 같은 질문을 평가할 수 없으면 source 비교가 아니라 새 과제로 기록하고 중단한다. |
+| 시간 | E001과 겹치는 historical period 또는 명시된 anchor date, source timezone/precision, event/publication time와 collection time의 분리 | source가 관측을 생성·갱신하는 방식과 latency | window별 record count와 time coverage를 설명할 수 없으면 prospective 수집 전에 중단한다. |
+| 모집단/coverage | 포함 규칙, 표본률 또는 API limitation, 누락/삭제/변경 이력 | YouTube가 이미 고른 trending list가 아닌 독립적인 선택 메커니즘(그 차이를 문서화) | 두 번째 소스도 동일한 큐레이션의 재게시라면 독립 신호로 해석하지 않는다. |
+| 텍스트/처리 | candidate 단위, 정규화·stopword·최소 support, source별 raw text와 전처리 version | 제목-only가 아닌 본문/게시물 등 source 고유 텍스트는 그대로 기록하되, 그 변화가 비교 가능성에 미치는 영향을 표시 | text representation을 맞출 수 없으면 “동일 알고리즘 비교”가 아니라 source-local descriptive comparison으로 제한한다. |
+| ID·중복 | native stable ID, exact duplicate/repost 규칙, 동일 source의 반복 관측 보존 여부 | source-native ID 체계와 cross-source linkage 난이도 | ID 또는 중복 근거가 없으면 count/rank를 합치지 않는다. |
+| provenance·권리 | 원출처, version/snapshot, license/terms, request manifest와 해시 | provider/API/수집 비용·접근 경로 | 원문 보관·재사용 권한 또는 재현 가능한 접근을 확인하지 못하면 원문을 저장소에 넣지 않는다. |
+| fusion timing | E001 로컬 결과를 변경 없이 control로 보존하고 source-local 결과를 먼저 낸다 | 두 번째 소스 자체와 source별 lead/lag/overlap | 로컬 결과를 보기 전에 early 결합으로 넘어가지 않는다. 로컬 비교가 source 기여를 설명하지 못하면 fusion 결론을 내리지 않는다. |
+| evaluation | 동일 anchor/reference와 human usefulness label 절차, 결과를 보기 전의 window·top-k 규칙 | 독립 source에서의 recall/overlap, first-observed source, latency 및 중복 양상 | gold label·event cluster를 만들 수 없으면 “문화적 중요도” 또는 알고리즘 우열을 선언하지 않는다. |
+
+### 6.5 E002의 구체적 순서와 비결론
+
+1. **Source qualification:** 후보 source의 sampling frame, timestamp semantics, stable ID, coverage, API/다운로드 조건, license/provenance를 먼저 확인한다. E001의 Kaggle archive는 version 1346, 고정 파일, SHA-256 manifest가 있는 control로 남긴다.
+2. **Historical slice와 capture contract 고정:** E001과 겹치는 기간/anchor를 정하고 event/publication time, collection time, timezone, 누락·중복·page token을 기록한다. prospective API라면 작은 dry capture에서 표본/지연/삭제 양상을 확인한 뒤 평가 snapshot을 얼린다.
+3. **Source-local replay:** 기존 E001 전처리와 Ranking A/B를 그대로 control로 보존하고, 두 번째 source는 가능한 범위에서 같은 후보·시간·최소 support 계약으로 별도 처리한다. source가 제목을 갖지 않으면 body/post를 제목처럼 숨겨 바꾸지 말고 차이를 명시한다.
+4. **비결합 비교:** top-k overlap, source별 support, first-observed source와 lead/lag, specific/generic/artifact 및 false alarm/miss 사례를 비교한다. 이것은 새 알고리즘 제안이 아니라 source contribution을 관찰하기 위한 평가 순서다.
+5. **그 이후에만 fusion 질문:** 두 로컬 결과가 서로 다른 정보와 같은 평가 단위를 충분히 보존하고, score semantics와 gold/reference를 설명할 수 있을 때에만 early/raw 결합을 별도 실험으로 검토한다. 그 전에는 late fusion도 하나의 새 ranking algorithm으로 구현하지 않고, 로컬 결과의 비교/감사 단계로 한정한다.
+
+다음은 이 조사로 **결론내릴 수 없는 것**이다.
+
+- Snoek의 broadcast-video 결과를 한국어 문화 trend나 YouTube/뉴스 조합에 일반화할 수 없다. “late가 관행적으로 정의되어 있다”는 것과 “이 프로젝트에서 더 정확하다”는 것은 다르다.
+- TREC RTS의 Twitter 약 1% sample은 운영 사례이지 대표성 보장이나 E002의 표본률 권고가 아니다. 동일 source라도 API 정책·지역·시점에 따라 coverage가 달라질 수 있다.
+- E001의 Ranking B가 더 시기 특이적으로 보였다는 관찰은 upstream YouTube selection과 Ranking B의 인과적 기여를 분리하지 못한다. human label이 없으므로 preregistered usefulness threshold도 아직 통과/실패로 선언하지 않는다.
+- 두 소스의 동시 상승이나 한 소스의 선행은 문화적 중요성, 인과관계, 전체 대중의 관심을 증명하지 않는다. 검색량·게시량·플랫폼 노출은 서로 다른 proxy다.
+- `published_at`/게시 시각은 사건 발생 시각과 자동으로 같지 않다. source가 사건 시각을 제공하지 않으면 “first observed”만 말한다.
+
+2026-08-28 현재, **E001의 curated YouTube snapshot과 독립적인 timestamped text stream을 한국어 신흥 문화 keyword ranking으로 직접 비교한 1차 문헌은 찾지 못했다.** 따라서 위 권고는 (i) early/late fusion을 직접 정의·비교한 원 연구, (ii) NIST의 stream sampling·TDT/RTS 평가 관행, (iii) W3C provenance/versioning 표준, (iv) YouTube 공식 API의 실제 timestamp/pagination 제한을 E002의 좁은 질문에 매핑한 것이다. 직접 일치하는 benchmark가 없으므로 source 선택과 최종 fusion 우열은 E002의 관찰·라벨·coverage 기록이 생긴 뒤에만 판단한다.
+
+### 6.6 2026-08-28에 확인한 1차 출처
+
+- [Snoek, Worring, Smeulders — *Early versus Late Fusion in Semantic Video Analysis*](https://doi.org/10.1145/1101149.1101236), ACM Multimedia 2005.
+- [Ngiam et al. — *Multimodal Deep Learning*](https://icml.cc/Conferences/2011/papers/399_icmlpaper.pdf), ICML 2011 공식 proceedings PDF.
+- [Fox and Shaw — *Combination of Multiple Searches*](https://www.govinfo.gov/content/pkg/GOVPUB-C13-6a6b0268e3a4a50f5ac0652f0b8a50b3/pdf/GOVPUB-C13-6a6b0268e3a4a50f5ac0652f0b8a50b3.pdf), TREC-2/NIST proceedings.
+- [Fiscus and Doddington — *Topic Detection and Tracking Evaluation Overview*](https://www.nist.gov/publications/topic-detection-and-tracking-evaluation-overview), NIST 2002.
+- [Martin et al. — *NIST Language Technology Evaluation Cookbook*](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=150472), NIST.
+- [Lin et al. — *Overview of the TREC 2017 Real-Time Summarization Track*](https://trec.nist.gov/pubs/trec26/papers/Overview-RT.pdf), NIST/TREC 2017.
+- [W3C — Data on the Web Best Practices](https://www.w3.org/TR/dwbp/) 및 [W3C — PROV-DM](https://www.w3.org/TR/prov-dm/).
+- [Google — YouTube Data API `search.list`](https://developers.google.com/youtube/v3/docs/search/list) 및 [video resource](https://developers.google.com/youtube/v3/docs/videos).
+
+## 7. E002 후보 source의 실제 적합성 점검 (2026-08-28, Asia/Seoul)
+
+### 7.1 판정 기준과 조사 결론
+
+이 절의 **확인된 사실**은 제공기관/데이터셋 소유자가 공개한 페이지·스키마·라이선스와, 접근 가능한 파일의 헤더/일부 행을 직접 확인한 것이다. **프로젝트 추론**은 그 사실을 E001/E002 질문에 적용한 문장으로 구분한다. 2026-08-28 현재, “한국어 문화·제목의 비트렌딩 timestamped stream”과 “원문 재사용권·고정 historical window·stable ID·재현 가능한 coverage”를 동시에 만족하는 공개 후보는 찾지 못했다. 따라서 E002의 두 번째 source를 곧바로 확정하기보다, cross-source transfer와 same-platform curation ablation을 먼저 분리해 승인받아야 한다.
+
+E001의 고정 control은 그대로 둔다. 프로젝트에서 확인한 범위는 Kaggle YouTube Trending Dataset v1346의 `KR_youtube_trending_data.csv`, 2021-08-18–2021-10-16, 8,326 snapshot rows, exact `(video_id, trending_date)` pair 기준 1,078 unique videos이다. 이것은 이미 YouTube가 trending으로 선택한 영상의 제목 stream이지, 한국 YouTube 업로드 모집단이 아니다. 아래 후보를 이 control에 붙여 합산하지 않고, 먼저 각 source-local 결과와 source 선택 규칙을 별도로 보존한다.
+
+### 7.2 후보별 실제 selection, schema, scale, 권리
+
+| 후보 | 정확한 selection mechanism과 time coverage | 확인된 row schema / ID / timestamp / scale | 권리·접근 및 실제 관찰 | 시험하는 불확실성 / disqualifier |
+|---|---|---|---|---|
+| **YouTube Trending control (E001, second source 아님)** | Kaggle archive의 한국 파일에 들어 있는 일별 trending snapshot. E001 고정 window는 2021-08-18–10-16. | `video_id`, `title`, `categoryId`, `trending_date` 등; 영상 ID와 trending 날짜를 pair로 보존. 8,326 rows, 1,078 unique videos (프로젝트 확인). | 고정 version/file/hash manifest가 있는 control. | **시험하지 않는 것:** 비선정 업로드에서의 발견과 source transfer. E002에서 다른 source처럼 재수집하거나 early 결합하면 안 된다. |
+| **YouTube Data API `search.list` (same-platform sensitivity probe)** | 공식 문서는 `q`를 검색어, `regionCode`를 해당 국가에서 시청 가능한 결과, `relevanceLanguage`를 우선 관련 언어로 정의하며 다른 언어도 반환될 수 있다고 명시한다. `order=date`, RFC 3339 `publishedAfter`/`publishedBefore`, `maxResults<=50`, page token을 제공하지만, 검색어를 쓰면 keyword-selected frame이 되고 검색어를 생략해도 전체 한국 업로드 열거 계약은 문서에 없다. ([공식 `search.list` 문서](https://developers.google.com/youtube/v3/docs/search/list)) | Search response는 `items[].id.videoId`, `items[].snippet.title`, `channelId`, `publishedAt` 등을 갖는다. `publishedAt`은 공개된 시각이며 업로드 시각과 다를 수 있다. ([공식 video resource](https://developers.google.com/youtube/v3/docs/videos)) `totalResults`는 근사치(최대 1,000,000)이므로 pagination 기준으로 쓰지 않고 page token을 써야 한다. 1 page 최대 50건이다. | API key/quota와 서비스 조건 확인이 필요하다. **프로젝트 추론:** 검색어·정렬·지역/언어 관련성에 의해 다시 선택된 결과이므로 모든 한국 업로드를 열거하지 않는다. E001 영상이 다른 search contract에서 얼마나 재발견되는지 보는 selection sensitivity probe일 수는 있지만, 비트렌딩 모집단 control이나 독립 cross-source evidence로는 부적합하다. |
+| **KCTI 문화예술지식 게시판 CSV** | 공공데이터포털이 제공하는 현재 snapshot 파일 `한국문화관광연구원_문화예술지식_게시판_20251218`. 기관 시스템에서 현재 제공 중인 게시글에 대한 정보라고 설명하며 업데이트는 수시(시스템 데이터)다. 시간범위는 포털에 기재되어 있지 않다. ([공식 파일·스키마 페이지](https://www.data.go.kr/data/15155439/fileData.do)) | `POST_NO`(게시글 번호), `BBS_TYPE_CD`, `POST_SUBJ`, `POST_CTN`, `LKUP_CNT`, `POST_DESC`(hashtags), `REG_DTTM`(등록일자, 최대 10자). 포털은 1,774 rows를 명시한다. 직접 CSV 다운로드의 헤더는 이 7개 필드였고, 앞부분에는 `POST_NO=212/189/167`, 제목 “2010 국민여가활동조사 …”, `REG_DTTM=2012-06-29`가 관찰됐다. | 로그인 없이 CSV 다운로드 가능하고 “이용허락범위 제한 없음”이다. 포털은 본문이 이미지/첨부만이면 공란일 수 있고 hashtags 도입 전 설명도 공란일 수 있다고 명시한다. | 기관이 제공하는 문화·정책·통계 지식 게시물의 source-local ranking이 어떤지를 시험할 수 있다. **프로젝트 추론:** 독립 대중 관측 stream 또는 사용자 관심의 proxy가 아니라 institutional editorial output에 가깝다. 고정 historical window/연속 수집 frame이 없고 본문 결측이 있어, 일반적인 cultural trend transfer의 second source로는 disqualify한다. |
+| **KCTI 문화예술지식정보 metadata** | 공공데이터포털의 연 1회 snapshot `한국문화관광연구원_문화예술지식정보_20260421`; 정책 연구·시장동향·통계·학술자료 목록이다. ([공식 파일 페이지](https://www.data.go.kr/data/15016595/fileData.do?recommendDataYn=Y)) | `호`, `등록일`, `제목`, `작성자`, `소속`, `국가`, `키워드`, `분류`, `데이터기준일`; 178 rows. 제목·키워드 중심이며 public conversation body stream이 아니다. | CSV·무료·이용허락범위 제한 없음. 포털 metadata의 시간범위는 비어 있다. | rights-clear한 metadata sanity check에는 쓸 수 있으나 178행·연 snapshot·기관 목록이라는 점이 disqualifier다. |
+| **KCTI 관광이슈보고서 현황** | `한국문화관광연구원_관광이슈보고서 현황_20260605`, 전문가 보고서 목록의 연 1회 snapshot. ([공식 파일 페이지](https://www.data.go.kr/data/15016606/fileData.do?recommendDataYn=Y)) | 순번, 구분, 제목, 발행일(CHAR 최대 10), 저자, 키워드, URL; 456 rows. | CSV; 공공저작물 제1유형(출처표시). 시간범위는 포털에 명시되지 않음. | 보고서의 publication index이지 timestamped article/public stream이 아니므로, source transfer용 second source로 disqualify한다. |
+| **NIKL 신문 말뭉치** | 국립국어원은 2022 corpus를 “2021년 생산된 신문 기사 중 매체로부터 저작권 이용을 허락받은 기사”라고 설명하고, 2020 corpus는 2019년 기사, 구 `신문 말뭉치` v2.0은 2009–2018년 기사로 설명한다. ([공식 corpus 목록](https://kli.korean.go.kr/main/requestMain.do)) 따라서 2021 corpus는 E001 window와 달력상 겹치지만, 2021 내부의 exact publication-date coverage와 매체별 포함 규칙은 신청 전 문서로 확인해야 한다. | 공식 공개 페이지에서 이 release의 모든 row schema와 실제 row를 내려받을 수 있는 상태는 확인하지 못했다. 국립국어원은 corpus가 제목·작성자·출처 등 자료 특성을 함께 갖춘다고 설명하지만([공식 corpus 소개](https://kli.korean.go.kr/corpus/introduce/introduceList.do)), 이를 해당 newspaper release의 완전한 row schema라고 간주하지 않는다. | 신청→관리자 승인→이용약정 서명 후 다운로드 절차이며, 승인된 목적/기간 밖 이용·제3자 이전이 제한된다. 외부 공개 전 국립국어원 사전 승인이 필요하다고 FAQ가 명시한다. ([공식 FAQ](https://kli.korean.go.kr/boards/faqList.do?lang=en)) 조사 시점 사이트에는 일부 기능 장애로 신청 불가 안내도 표시됐다. | **프로젝트 추론:** broad newspaper title/body stream, source/date/provenance가 가장 잘 갖춰질 가능성이 높아 cross-source 후보 1순위다. 다만 exact schema, row count, media/category coverage, E001 기간의 실제 overlap은 승인·설명자료 확인 전 미검증이다. 접근·재배포 조건과 현재 신청 장애가 즉시 실행의 disqualifier다(권리 확인 없는 원문 저장 금지). |
+| **Donga_Article Hugging Face mirror** | dataset card에 따르면 Donga 기사 crawler로 2023년 업로드 기사와 2024년 1–7월 기사를 모은 fixed mirror이며 관련기사 검색/추천 용도다. ([dataset card](https://huggingface.co/datasets/kidong98/Donga_Article), [raw README](https://huggingface.co/datasets/kidong98/Donga_Article/raw/main/README.md)) | 실제 `2023.csv` 첫 줄은 `id,title,date,content,link`; 첫 row에는 `id=117245267`, `date=20230107`, 제목·본문·Donga URL이 있었다. README는 2023 약 45,000건, 2024년 1–7월 약 30,000건이라 설명하고, `_split`은 본문을 450자 단위로 나누며 ID suffix를 추가한다고 한다. | API metadata에서 2024-09-11 수정 시각과 약 1.4GB storage는 확인했지만 dataset license field는 확인되지 않았다. viewer도 파일 간 column 불일치(cast error)를 보고한다. | 규모와 `id/title/date/content/link`는 매력적이지만 E001(2021)과 historical overlap이 없고 단일 언론사다. **Disqualifier:** 원문 기사 재사용권·dataset license 불명, 파일 variant schema drift, category/coverage 계약 부재. 원문을 저장소에 복사하거나 broad Korean culture stream으로 해석하지 않는다. |
+| **Naver News chronological crawler (prospective only)** | collector repository는 날짜(`YYYY`, `YYYY-MM`, `YYYY-MM-DD`)와 category(`생활문화` 포함)를 받아 Naver News 일별 section archive의 모든 page를 순회하고, page=2000에서 파악한 마지막 page까지 기사 link를 추출한다. `DOWNSAMPLE_FACTOR`로 발견 link를 건너뛸 수도 있다. ([collector README](https://github.com/bovwes/naver-news-crawler), [collector code](https://raw.githubusercontent.com/bovwes/naver-news-crawler/main/crawler.py)) | 출력은 `timestamp,category,outlet,headline,content,url`; parser는 article `data-date-time`, outlet, headline, `dic_area` 본문을 읽는다. native article ID field는 없고 URL이 dedup key 후보다. 고정 downloadable backfill/실측 row count는 없으며, 현재 HTML·누락·재시도 정책에 따라 달라진다. | repository의 MIT는 crawler code에 대한 것이며 Naver/각 언론사의 원문 권리를 부여하지 않는다. Naver 공식 API/이용조건·robots·언론사별 재사용 권한은 이 collector에서 확인되지 않는다. | historical replay가 아닌 최소 prospective alternative다. **프로젝트 추론:** section/date/category라는 frame을 명시하면 source-local stream과 lead/lag를 시험할 수 있다. 그러나 법적/약관 확인, request failure log, stable ID와 snapshot contract를 먼저 승인하지 않으면 결과를 평가할 수 없어 disqualify한다. |
+| **BIGKinds/한국언론진흥재단 파리 올림픽 metadata** | 공공데이터포털의 1회성, Paris Olympics 관련 BIGKinds-derived domestic-news subset; media FTP로 수집했다고 명시한다. ([공식 파일 페이지](https://www.data.go.kr/data/15153594/fileData.do?recommendDataYn=Y)) | 기사 주소, 보도일자, 언론사, 기고자, 제목, 통합분류, 개체명, 키워드, 특성추출값, 본문 content를 포함하며 51,521 rows. | 무료 CSV, 공공저작물 제4유형(출처표시·상업적 이용금지·변경금지); 제공 페이지는 1회성이고 본문은 publisher copyright 때문에 최대 200자, 일부 field 결측 가능하다고 기록한다. | 알려진 단일 event의 event-cluster/lead-lag sanity check에는 유용하지만, general culture stream이 아니며 E001 window와 겹치지 않는다. **Disqualifier:** event-specific one-off와 rights restriction; E002의 일반 curation ablation 후보로 순위를 올리지 않는다. |
+
+### 7.3 same-platform probe와 cross-source transfer의 분리
+
+`search.list`를 둘째 source 또는 비트렌딩 모집단 control이라고 부르면 질문이 섞인다. YouTube Trending과 API search는 같은 platform이지만 서로 다른 upstream selection을 거친다. `search.list`는 query가 있으면 keyword-selected 결과이고, `regionCode=KR`, `relevanceLanguage=ko`도 한국어 업로드 모집단의 census를 뜻하지 않는다. API 결과에서 E001 영상 ID가 얼마나 재발견되는지는 curation overlap/selection sensitivity이며, 독립 source가 trend를 확인했다는 증거가 아니다. 모든 요청 parameter, page token, response time, quota 오류와 빈 page를 저장해도 이 selection 한계를 제거하지는 못한다.
+
+반대로 NIKL·Naver·Donga·BIGKinds는 news/institutional media source와 YouTube 사이의 **cross-source transfer** 후보지만, 각각 source owner의 editorial frame·coverage·rights가 다르다. 두 source 결과의 top-k overlap, first-observed source, lead/lag는 비교할 수 있지만, 서로 다른 모집단의 count를 합쳐 early/raw fusion score를 만들 근거는 아니다. KCTI는 rights-clear지만 institutional board라서 source independence보다 “기관이 정리한 지식 목록에 기존 ranking이 어떻게 보이는가”를 시험하는 별도 audit에 가깝다.
+
+### 7.4 순위와 선택, 그리고 권고 순서
+
+1. **NIKL은 scientific-fit 1순위지만 즉시 경로에서는 제외 상태를 유지한다.** 사용자는 이미 신청·승인 대기가 긴 입력 대신 다른 후보를 찾기로 결정했다. 그 결정을 되돌리지 않으며, 사용자가 나중에 명시적으로 재검토할 때만 exact schema, media/category coverage, publication-date precision, E001 window overlap, 원문 보관·결과 공개 조건을 확인한다.
+2. **현재 즉시 실행 가능한 기존 데이터 중 E002를 깨끗하게 답하는 후보는 없다.** KCTI는 rights-clear하지만 희소한 institutional output이고, Donga는 rights/schema/period, BIGKinds Olympics는 event-selected scope 때문에 제외된다.
+3. **`search.list`는 curation ablation으로 승격하지 않는다.** 별도 승인 시 E001 영상의 재발견과 query/region/language contract 민감도를 보는 작은 same-platform probe는 가능하지만, 이것으로 비트렌딩 전체 업로드와 비교했다고 결론내리지 않는다.
+4. **다음 실무 경로는 prospective chronological feed의 source qualification이다.** Naver crawler repository는 가능한 field와 section/date traversal의 참고 구현일 뿐 채택된 collector가 아니다. 먼저 공식 endpoint/feed 또는 source owner의 chronology, robots/terms, metadata 보관 권리, stable ID, page completeness를 확인하고, 만족하는 source가 있을 때만 metadata-only dry capture를 별도 승인한다.
+5. **Donga mirror와 Paris Olympics metadata는 현재 E002의 일반 후보에서 제외한다.** 전자는 rights/schema/period, 후자는 event-specific scope가 해결되지 않는다.
+
+이 순위는 알고리즘 추천이 아니다. 각 source가 보존하는 selection frame과 timestamp/ID/provenance를 기준으로 한 **접근 gate 순서**다. 현재 조사에는 “E001 curated YouTube snapshot과 독립적인 한국 문화 title stream의 curation ablation”을 직접 다룬 공개 1차 benchmark가 없었다. NIKL의 승인된 실제 schema와 Naver의 합법적 prospective capture가 없으므로, 어떤 source가 더 정확하거나 문화적으로 더 중요한지 결론내릴 수 없다.
+
+### 7.5 E002 전에 필요한 가장 작은 승인
+
+사용자가 승인할 것은 fusion 방식이나 새 ranking algorithm이 아니라 다음 중 **한 가지 source 목적**이다.
+
+> **A. prospective source qualification (현재 권고):** 아직 수집기를 만들지 않고, 공식 chronological feed/endpoint가 sampling frame, timestamp, stable ID, pagination coverage, metadata 이용 조건을 만족하는지 조사한다. 적합한 source가 확인된 뒤 metadata-only dry capture를 별도로 승인한다.
+>
+> **B. same-platform sensitivity probe:** YouTube Data API `search.list`의 query/region/language/date contract가 E001 영상 재발견에 미치는 영향을 본다. 이는 curation ablation이나 second cross-source로 해석하지 않는다.
+>
+> **C. NIKL 재검토:** 사용자가 승인 대기를 감수하기로 명시적으로 바꿀 때만 신청·이용약정 확인을 재개한다.
+
+그 승인 전에는 source rows를 결합하거나 early fusion을 구현하지 않는다.
+
+## 8. 공식 chronological feed의 최종 prospective qualification (2026-08-28, Asia/Seoul)
+
+### 8.1 확인 범위와 결론
+
+이번 추가 점검은 검색어 없이 최신 항목을 내놓는 **first-party Korean broadcaster/publisher RSS**만 대상으로 했다. 각 URL을 2026-08-28에 직접 요청해 XML의 실제 item, title, publication time, link/GUID, item 수를 확인했다. 결과적으로 historical backfill·pagination·권리 조건을 모두 공개한 공식 feed는 찾지 못했다. 그래도 E002의 최소 prospective metadata lens로는 SBS 연예 RSS 하나가 가장 작고 명확하다. 이는 매체가 편집해 노출한 연예 기사 목록이지, 비큐레이션 문화 모집단이 아니다.
+
+| 공식 후보 | live selection/feed와 실제 관찰 | ID·시간·history/refresh | robots·권리·판정 |
+|---|---|---|---|
+| **SBS 뉴스 연예 RSS (조건부 1순위)** | SBS가 공식 RSS 안내 페이지에서 연예 section URL을 직접 제공한다: [`SectionRssFeed.do?sectionId=14`](https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=14&plink=RSSREADER). 2026-08-28 live response는 channel `방송/연예 - SBS 뉴스 섹션`, 29 items였다. 실제 첫 항목은 “봉준호 감독 …” (`pubDate` 2026-08-28 13:20 KST), 다음은 “사랑의 하츄핑2 …” (11:53 KST)였다. | 각 item에 `title`, RFC 822 `pubDate`(+09:00), `link`, `guid`가 있고 link/GUID URL에 `news_id=N1008726731` 같은 stable native ID가 있다. 관찰된 29 items의 범위는 2026-08-26 18:43–08-28 13:20 KST(약 43시간)였다. feed에는 pagination/history cursor나 retention 보장이 없고 `<ttl>`도 관찰되지 않았다. **사실:** SBS 안내는 RSS를 업데이트된 뉴스 구독 수단으로 설명하지만, 과거 item 보존을 약속하지 않는다. | SBS `robots.txt`는 `/news/*` 및 RSS sitemap/section feed를 허용한다([공식 robots](https://news.sbs.co.kr/robots.txt)). 다만 공식 RSS 안내는 개인 이용자의 비상업적 사용만 허가하고 상업적 사용은 사전 문의하라고 명시한다([공식 RSS 안내](https://news.sbs.co.kr/news/rss.do)). **프로젝트 추론:** URL·timestamp·item rate가 가장 좋은 metadata-only dry-capture 후보지만, 이 이용 조건을 확인하기 전에는 자동 수집·저장을 승인된 것으로 간주하지 않는다. SBS의 editorial section selection도 보존해 기록한다. |
+| **조선닷컴 연예 RSS (대안)** | 조선닷컴 공식 RSS 안내의 연예 URL은 [`entertainments` feed](https://www.chosun.com/arc/outboundfeeds/rss/category/entertainments/?outputType=xml)다. live response는 100 items였고, 실제 첫 item은 “[사진]선재스님, 인자한 미소”, `pubDate` 2026-08-28 15:12 KST였다. | `title`, `link`, `guid isPermaLink=true`, `pubDate`, `description`/`content:encoded`, `dc:creator`가 있고 GUID URL은 `/entertainments/.../2026/08/28/<opaque-id>/` 형태다. 관찰된 100 items는 약 2026-08-28 11:26–15:12 KST(약 4시간)였으며 feed에 pagination/history cursor가 없다. channel `<ttl>1`은 있었지만 retention/backfill 계약은 아니다. | 공식 RSS 페이지는 RSS를 개인 PC 등 제한된 공간에서 개인 구독하는 용도로 한정하고, 상업 이용은 `rss@chosun.com` 문의 대상으로 둔다([공식 RSS 안내](https://rssplus.chosun.com/)). `robots.txt`는 일반 news 경로를 광범위하게 허용하지만([공식 robots](https://www.chosun.com/robots.txt)), robots 허용이 저작권/재사용 허가를 대체하지 않는다. **Disqualifier:** 짧은 history와 개인·비상업 조건, 그리고 현재 feed가 OSEN/스포츠조선 등 외부 제작자 항목도 섞는 editorial/syndication frame. |
+| **KBS WORLD Radio K-POP/연예 RSS (제외)** | KBS 공식 RSS 안내가 연예가 소식 feed URL을 제공한다: [`rss_enternews.htm?lang=k`](https://world.kbs.co.kr/rss/rss_enternews.htm?lang=k). live response는 `[KBS WORLD Radio] K-POP News`, 20 items였고 첫 제목은 “‘2관왕’ 아홉 …”, 두 번째는 “키키 …”였다. | `title`, `link`, `guid`, `author`, `enclosure`, `pubDate`가 있지만 관찰된 `pubDate`는 `2026-08-28`처럼 날짜 precision만 있고 시간대가 없다. 최신 20 items의 범위는 2026-08-27–08-28이었고 `<ttl>15`가 있었다. pagination/history endpoint는 보이지 않았다. | KBS는 RSS를 자동으로 최신 방송/뉴스 콘텐츠를 제공하는 서비스라고 설명하지만([공식 RSS 안내](https://world.kbs.co.kr/service/about_rss.htm?lang=k)), `world.kbs.co.kr/robots.txt`는 `User-agent: * Disallow: /`를 반환했다([공식 robots](https://world.kbs.co.kr/robots.txt)). **Disqualifier:** automated prospective collection의 robots 충돌, date-only timestamp, 20-item latest window. |
+
+### 8.2 선택과 최소 metadata contract
+
+**권고(조건부): SBS 연예 RSS 하나만 metadata-only dry capture 후보로 승인한다.** SBS는 공식 section endpoint, stable `news_id` link/GUID, 시간 단위 `pubDate`, 약 29 items/약 43시간의 관찰 가능한 rate를 제공해 KBS보다 평가 가능한 시간축을 갖고, 조선보다 현재 feed가 덜 짧은 window였다. 다만 이것은 “SBS가 편집한 연예 기사 selection”이라는 cross-source transfer lens이며, YouTube Trending처럼 platform curation을 제거한 모집단도 아니다. SBS의 개인·비상업 RSS 조건이 연구용 내부 저장을 허용하는지는 이 조사만으로 결정하지 않는다.
+
+승인될 경우 필요한 최소 보존 필드는 `source_feed_url`, 요청 시각(`collected_at`, timezone), RSS channel/build 정보, `title`, `pubDate`(+offset), `link`, `guid`, publisher/section, 그리고 원 response hash다. 이 목록은 수집 구현을 제안하는 것이 아니라, 같은 item의 재등장·누락·지연을 설명하기 위한 provenance 최소선이다. 본문·이미지·description은 저장하지 않고 title metadata만 보존하는 범위를 먼저 확인한다. feed item count와 보존 기간은 매 요청의 관찰값으로 기록하며, 29 items를 전체 SBS 연예 기사 수로 해석하지 않는다.
+
+### 8.3 남은 비결론과 E002 승인 gate
+
+- RSS feed가 chronological item을 제공한다는 사실은 해당 매체의 editorial selection을 제거하지 않는다. SBS/조선/KBS 모두 “문화 전체” 또는 “한국인의 관심 전체”의 unbiased frame이 아니다.
+- live item count, `<ttl>`, robots 허용은 historical retention·재현 가능한 backfill·원문/metadata 재사용권을 보장하지 않는다. 이 조사에서는 pagination, archive endpoint, feed 변경 이력도 확인되지 않았다.
+- SBS 연예 RSS와 E001 YouTube Trending의 overlap/lead-lag는 서로 다른 editorial/platform selection의 비교다. 이것만으로 문화적 중요도나 알고리즘 우열을 주장하지 않는다.
+
+따라서 E002 전에 사용자가 승인할 가장 작은 결정은 **“SBS 공식 연예 RSS를 title/timestamp/link/GUID/hash만 보존하는 비상업 metadata-only dry capture로 사용해도 되는가”**이다. 권리·이용조건 승인이 없으면 공식 feed도 second source로 채택하지 않고, NIKL 신청 또는 Naver prospective gate로 돌아간다. 어떠한 feed도 승인 전에는 source rows를 E001과 결합하지 않는다.
+
+### 8.4 후속 확인과 historical backfill 실행 (2026-08-29)
+
+위 RSS 조사 뒤 공식 SBS 연예 섹션의 날짜·페이지 목록을 다시 직접
+확인했다. `newsSection.do?pageDate=YYYYMMDD&pageIdx=N&sectionType=14`가 과거
+날짜별 기사 목록과 pagination을 반환하고, 목록 안의 Schema.org metadata가
+`headline`, timezone이 있는 `datePublished`, native `news_id` URL을 제공했다.
+따라서 24시간 prospective RSS 관찰보다 작은 경로로 historical metadata
+backfill을 선택했다. 이 확인은 8.1의 “historical endpoint를 찾지 못했다”는
+조사 상태를 갱신하지만, SBS가 history completeness나 retention을 공식
+보장한다는 뜻은 아니다.
+
+사용자는 본문·이미지·description을 제외하고 제목·발행시각·ID·링크만
+수집해 source-local Ranking B를 실행하는 범위를 승인했다. 2026-06-30부터
+2026-08-28까지 60일, 117페이지에서 844개 unique article을 얻었고 결과는
+`docs/experiment-log.md`에 기록했다. 이 실행은 SBS와 YouTube를 합치지 않으며,
+서로 다른 기간과 support unit 때문에 overlap·lead/lag·score magnitude 비교를
+하지 않는다. 기존 RSS dry-capture gate는 이 실행의 선행 조건이 아니며,
+prospective 운영 관찰이 필요해질 때만 다시 검토한다.

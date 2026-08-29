@@ -1,10 +1,10 @@
 # E001 YouTube Trend Keyword Baseline Implementation Plan
 
-> **For Codex:** Use subagent-driven-development to execute this plan. Every implementation task follows strict TDD: add one behavior test, run it and observe the expected failure, add the smallest implementation, run the focused test, then commit. Use only `gpt-5.6-luna` subagents for implementation and review.
+> **For Codex:** Use a Luna subagent for the bounded implementation, then verify the real result. Ponytail full applies: keep only the code and checks needed to answer E001.
 
 **Goal:** Reproduce two deterministic top-20 Korean cultural candidate rankings from a fixed historical Korean YouTube trending dataset, then generate reviewable local Markdown and JSON results without committing the raw dataset.
 
-**Architecture:** A small `src` package separates dataset snapshots, title candidate extraction, ranking, and report rendering. A thin downloader records the fixed Kaggle version and checksum; a thin experiment CLI composes the pure modules. Raw data and generated reports remain ignored, while the experiment contract, manifest fields, tests, and an outcome summary are committed.
+**Architecture:** The existing dataset boundary validates the fixed input. One experiment script contains candidate extraction, the two rankings, and Markdown/JSON rendering. One small test file protects the non-trivial scoring and phrase behavior. Raw data and generated reports remain ignored.
 
 **Tech Stack:** Python 3.12+, `uv`, `kiwipiepy==0.23.2`, `pytest`; standard-library CSV, ZIP, JSON, datetime, hashlib, urllib, argparse.
 
@@ -16,6 +16,7 @@
 
 - Modify: `.gitignore`
 - Create: `pyproject.toml`
+- Create: `uv.lock`
 - Create: `README.md`
 - Create: `src/trend_signal_lab/__init__.py`
 - Create: `src/trend_signal_lab/dataset.py`
@@ -42,43 +43,30 @@
 7. Run `uv run pytest tests/test_dataset.py -v` and `uv run pytest -q`.
 8. Commit the task.
 
-## Task 2: Candidate extraction, rankings, and result artifact
+## Task 2: Minimal ranking experiment and result artifact
 
 **Files:**
 
-- Create: `src/trend_signal_lab/candidates.py`
-- Create: `src/trend_signal_lab/ranking.py`
-- Create: `src/trend_signal_lab/report.py`
 - Create: `scripts/run_e001.py`
-- Create: `tests/test_candidates.py`
-- Create: `tests/test_ranking.py`
-- Create: `tests/test_report.py`
+- Create: `tests/test_e001.py`
 - Create: `docs/experiment-log.md`
 - Modify: `README.md`
 
 **Behavior contract:**
 
-- NFKC normalization and Kiwi analysis preserve readable Korean proper/common nouns and foreign terms.
-- Candidate generation emits 1–3 consecutive eligible tokens, breaks across ineligible tokens or punctuation, counts a candidate once per snapshot, and favors an equally supported longer phrase over its component.
-- Ranking A uses current snapshot document share.
-- Ranking B uses the preregistered smoothed log2 share ratio, with current df at least 5.
-- Ordering is deterministic: score, current df, longer candidate, lexical order.
-- The fixed CLI writes ignored `artifacts/e001/results.json` and `artifacts/e001/results.md` containing both top-20 tables, counts, parameters, source manifest, and up to three evidence rows.
+- One script performs NFKC normalization, Kiwi tokenization, consecutive 1–3-gram extraction, per-snapshot uniqueness, equal-support phrase preference, Ranking A, Ranking B, deterministic ordering, and Markdown/JSON rendering.
+- One small test file protects readable `오징어 게임` extraction, punctuation boundaries, daily persistence counting, the fixed smoothed formula/minimum support, and deterministic output.
+- The fixed CLI writes ignored `artifacts/e001/results.json` and `artifacts/e001/results.md` with both top-20 tables, counts, parameters, source manifest, and up to three evidence rows.
 - The committed experiment log records only provenance, parameters, technical execution facts, anchor presence, and that the final usefulness labels await the user's review.
 
-**TDD sequence:**
+**Implementation sequence:**
 
-1. Write `test_extracts_readable_unigrams_and_squid_game_phrase` with hand-written expected candidates; run the focused test and observe import/behavior failure.
-2. Implement normalization, Kiwi token selection, and consecutive 1–3-grams; rerun and observe pass.
-3. Add failing tests for punctuation boundaries, per-snapshot uniqueness, stopwords, and equal-support phrase subsumption; implement each smallest behavior and rerun after each.
-4. Write `test_current_share_counts_daily_persistence` with literal snapshot sets; fail it, implement Ranking A, rerun.
-5. Write `test_change_score_uses_fixed_smoothing_and_minimum_support` with hand-calculated values; fail it, implement Ranking B, rerun.
-6. Add a deterministic tie-order test and implement the ordering.
-7. Write a report test against a tiny in-memory result, asserting parsed JSON fields and semantic Markdown content; fail it, implement renderer, rerun.
-8. Add the thin CLI, run `uv run python scripts/run_e001.py --input data/raw/kr_youtube_trending_data.zip --output-dir artifacts/e001`, and inspect both generated files.
-9. Update README and experiment log from the actual run, without declaring the human usefulness threshold passed.
-10. Run `uv run pytest -q` and rerun the CLI once from a clean artifact directory to verify determinism by file hashes.
-11. Commit the task.
+1. Implement the single script and one compact test file; do not add abstractions for hypothetical experiments.
+2. Run `uv run pytest -q`.
+3. Run `uv run python scripts/run_e001.py --input data/raw/kr_youtube_trending_data.zip --output-dir artifacts/e001` and inspect both generated files.
+4. Update README and experiment log from the actual run, without declaring the human usefulness threshold passed.
+5. Run the CLI twice to separate ignored directories and compare file hashes.
+6. Commit the task.
 
 ## Task 3: Whole-experiment verification and handoff
 
@@ -88,7 +76,7 @@
 
 **Verification:**
 
-1. Review the whole branch against the approved design, with special attention to snapshot-vs-video counting, temporal leakage, phrase extraction, raw-data Git safety, and unsupported success claims.
+1. Inspect the whole diff against the approved design, especially snapshot-vs-video counting, temporal leakage, phrase extraction, raw-data Git safety, and unsupported success claims.
 2. Run `uv sync --locked`, `uv run pytest -q`, `git check-ignore data/raw/kr_youtube_trending_data.zip`, and the fixed E001 CLI.
 3. Compare SHA-256 of two independently generated result JSON and Markdown files.
 4. Inspect `git status --short` and `git diff --check`; confirm no raw dataset, secret, or large generated artifact is tracked.
