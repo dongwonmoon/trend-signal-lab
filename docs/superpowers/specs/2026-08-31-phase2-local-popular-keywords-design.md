@@ -1,8 +1,9 @@
 # Phase 2 — Local daily popular-keyword page
 
 **Date:** 2026-08-31
-**Status:** Design direction approved; written spec awaiting user review
+**Status:** Approved by user on 2026-08-31
 **Parent:** [Product roadmap](2026-08-30-product-roadmap-design.md)
+**Plan:** [Implementation handoff](../plans/2026-08-31-phase2-local-popular-keywords.md)
 
 ## Purpose and decision
 
@@ -168,6 +169,6 @@ not silently tune until it looks positive.
 - **Keyword history and why-it-is-popular explanations:** later detail work;
   neither is necessary to complete the current list.
 
-After written-spec review, create the Phase 2 implementation plan using the
-roadmap's purpose, ownership, verification, and escalation handoff format. Do
-not implement runtime changes as part of this documentation step.
+The linked implementation plan follows the roadmap's purpose, ownership,
+verification, and escalation handoff format. Approval of this written spec
+does not mean runtime implementation or daily-output acceptance is complete.

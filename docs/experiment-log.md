@@ -302,4 +302,6 @@ whereas prematurely fixing the product output would make them harder.
   as today's trend or silently change the baseline.
 - The [Phase 2 design](superpowers/specs/2026-08-31-phase2-local-popular-keywords-design.md)
   records the accepted direction and deferred decisions. This update contains
-  no new run, runtime change, or deployment; written-spec review comes next.
+  no new run, runtime change, or deployment. The user subsequently approved the
+  written spec and requested its implementation handoff plan; daily-output
+  acceptance remains pending until the actual page is inspected.

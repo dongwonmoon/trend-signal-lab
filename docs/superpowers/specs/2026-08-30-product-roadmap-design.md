@@ -129,8 +129,10 @@ day, rank by that day's views, apply only the approved Wikimedia prefix
 exclusions, and generate a static HTML page from source-local JSON. Display the
 actual measurement date; this is neither a 30-day mean nor real-time growth.
 See the [Phase 2 design](2026-08-31-phase2-local-popular-keywords-design.md) for
-the approved direction, failure behavior, and deferred decisions. Its written
-spec is awaiting user review before implementation planning.
+the approved direction, failure behavior, and deferred decisions. The user
+approved the written spec; its linked implementation plan defines the two
+sequential tasks. Track execution there and daily-output acceptance in the
+experiment log, separately from design approval.
 
 **Exit evidence:** A user can open the page, understand what is current, and
 judge whether browsing the list is interesting. The generation path is
