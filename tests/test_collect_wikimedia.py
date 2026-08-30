@@ -22,7 +22,7 @@ def response(*, project: str = "ko.wikipedia") -> bytes:
                     "day": "29",
                     "articles": [
                         {"article": "리센느", "views": 20, "rank": 1},
-                        {"article": "오징어_게임", "views": 10, "rank": 1},
+                        {"article": "오징어_게임", "views": 10, "rank": 3},
                     ],
                 }
             ]
@@ -47,7 +47,7 @@ def test_collect_day_is_atomic_idempotent_and_validated(tmp_path):
     assert stored["time_zone"] == "UTC"
     assert stored["collected_at"] == "2026-08-30T01:23:45Z"
     assert stored["articles"][0] == {"article": "리센느", "views": 20, "rank": 1}
-    assert stored["articles"][1] == {"article": "오징어_게임", "views": 10, "rank": 1}
+    assert stored["articles"][1] == {"article": "오징어_게임", "views": 10, "rank": 3}
 
     assert collect_day(DAY, tmp_path, fetcher=fetcher, now=lambda: NOW) == "skipped"
     assert calls == 1

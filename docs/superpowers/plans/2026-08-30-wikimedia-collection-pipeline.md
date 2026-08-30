@@ -32,7 +32,7 @@
 - Produces: `collect_day(day: date, output_root: Path, *, fetcher: Callable[[date], bytes] = fetch_day, now: Callable[[], datetime] = utc_now) -> str`, returning `"written"` or `"skipped"`.
 - Produces: CLI flags `--start YYYY-MM-DD`, optional `--end YYYY-MM-DD`, and optional `--output-dir` defaulting to `data/raw/wikimedia`.
 
-- [ ] **Step 1: Write the focused failing test**
+- [x] **Step 1: Write the focused failing test**
 
 Create `tests/test_collect_wikimedia.py` with one test covering accepted storage,
 rerun skipping, and invalid-response isolation:
@@ -105,7 +105,7 @@ def test_collect_day_is_atomic_idempotent_and_validated(tmp_path):
     assert not (invalid_root / "ko.wikipedia.org" / "2026-08-29.json").exists()
 ```
 
-- [ ] **Step 2: Run the focused test and confirm the expected failure**
+- [x] **Step 2: Run the focused test and confirm the expected failure**
 
 Run:
 
@@ -115,7 +115,7 @@ uv run pytest -q tests/test_collect_wikimedia.py
 
 Expected: collection fails because `scripts.collect_wikimedia` does not exist.
 
-- [ ] **Step 3: Implement only the daily collector and explicit range CLI**
+- [x] **Step 3: Implement only the daily collector and explicit range CLI**
 
 Create `scripts/collect_wikimedia.py` with these constants and behaviors:
 
@@ -186,7 +186,7 @@ The CLI must parse ISO dates with `date.fromisoformat`, default `--end` to
 `--start`, reject `end < start`, process days sequentially, print one concise
 `written` or `skipped` line per date, and exit non-zero on the first exception.
 
-- [ ] **Step 4: Run the focused test and confirm it passes**
+- [x] **Step 4: Run the focused test and confirm it passes**
 
 Run:
 
@@ -196,7 +196,7 @@ uv run pytest -q tests/test_collect_wikimedia.py
 
 Expected: `1 passed`.
 
-- [ ] **Step 5: Run the short repository verification**
+- [x] **Step 5: Run the short repository verification**
 
 Run:
 
@@ -209,7 +209,7 @@ git check-ignore data/raw/wikimedia/ko.wikipedia.org/2026-08-29.json
 Expected: the complete test suite passes, the diff check is clean, and the raw
 path is reported as ignored.
 
-- [ ] **Step 6: Run one bounded live compatibility check outside repository raw data**
+- [x] **Step 6: Run one bounded live compatibility check outside repository raw data**
 
 Run:
 
@@ -224,7 +224,7 @@ ties or gaps are preserved.
 If network access fails, report the exact failure without weakening validation
 or adding retry infrastructure. Do not run the 60-day backfill.
 
-- [ ] **Step 7: Review and commit the implementation**
+- [x] **Step 7: Review and commit the implementation**
 
 Review only the two owned files and confirm no raw data is tracked, then run:
 
@@ -232,3 +232,11 @@ Review only the two owned files and confirm no raw data is tracked, then run:
 git add scripts/collect_wikimedia.py tests/test_collect_wikimedia.py
 git commit -m "feat: collect wikimedia daily pageviews"
 ```
+
+### Verification record (2026-08-30)
+
+- Focused test: `1 passed`; full suite: `24 passed`.
+- Bounded live smoke for `2024-01-01` wrote 996 articles and preserved 200
+  tied-rank groups; no 60-day run was performed.
+- `data/raw/wikimedia/ko.wikipedia.org/2026-08-29.json` is ignored, and the
+  branch diff check is clean.
