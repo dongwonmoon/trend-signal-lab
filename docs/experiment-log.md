@@ -274,15 +274,32 @@ whereas prematurely fixing the product output would make them harder.
 ## Provisional interpretation
 
 - The prominence list is readable and plausible and already surfaces an
-  anticipated anchor (`리센느` at rank 12). Increased-attendance is dominated
-  by pages that were absent from the previous window (`mean prev = 0`), each
-  with a near-maximum change score, so ranks 1-20 are informative about which
-  pages appeared but not yet about relative growth intensity.
+  anticipated anchor (`리센느` at rank 12). Every increased-attendance top-20
+  page was absent from the previous window's retained top-page lists. The
+  baseline encodes this absence as `mean prev = 0`; it does not establish zero
+  actual views. With the same zero baseline, ordering follows current observed
+  mean views. The log-ratio has no fixed maximum, and the result must not be
+  described as a measured growth rate from zero actual audience interest.
 - System pages (`위키백과:대문`, `특수:검색`, `특수:최근바뀜`, Ediathon
   namespace, the `파일:` media page) and `_`-joined page names remain visible
   as source-local artifacts; they are recorded, not tuned away.
 - This is a source-local baseline inside Korean Wikipedia readership. It is not
   a measure of Korean culture-wide prevalence and does not fix a final score,
   UI, or product contract.
-- Phase 2 (single-source local product slice) is not yet approved to start;
-  the next wait is human judgment on these two lists.
+- At the time of this run, Phase 2 was awaiting human judgment on these lists.
+
+## Human judgment and Phase 2 direction — 2026-08-31
+
+- The user judged Phase 1 broadly positive and approved the Phase 2 design
+  direction: a local static `인기 키워드` page using the latest retained
+  completed UTC day's views, with limited Wikimedia prefix exclusions and
+  visible source/date information.
+- This closes the pending qualitative judgment for proceeding to a local
+  product slice. It does not validate daily output quality, approve a final
+  trend score, or resolve historical top-list censoring.
+- The two 30-day baseline results remain historical evidence. Phase 2 will
+  inspect daily outputs separately rather than relabel the existing averages
+  as today's trend or silently change the baseline.
+- The [Phase 2 design](superpowers/specs/2026-08-31-phase2-local-popular-keywords-design.md)
+  records the accepted direction and deferred decisions. This update contains
+  no new run, runtime change, or deployment; written-spec review comes next.

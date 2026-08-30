@@ -1,6 +1,6 @@
 # Trend Signal Lab Product Roadmap Design
 
-**Date:** 2026-08-30  
+**Date:** 2026-08-30
 **Status:** Approved roadmap; only the current phase may be planned in detail
 
 ## Purpose
@@ -123,6 +123,14 @@ to judge only tables and experiment artifacts.
 JSON and presents one plainly named `인기 키워드` list. The phase may show
 minimal supporting numbers needed to understand the list, but it does not add
 accounts, search, personalization, editorial tools, or a database.
+
+**Selected design — 2026-08-31:** Use the most recent retained completed UTC
+day, rank by that day's views, apply only the approved Wikimedia prefix
+exclusions, and generate a static HTML page from source-local JSON. Display the
+actual measurement date; this is neither a 30-day mean nor real-time growth.
+See the [Phase 2 design](2026-08-31-phase2-local-popular-keywords-design.md) for
+the approved direction, failure behavior, and deferred decisions. Its written
+spec is awaiting user review before implementation planning.
 
 **Exit evidence:** A user can open the page, understand what is current, and
 judge whether browsing the list is interesting. The generation path is
