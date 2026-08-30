@@ -305,3 +305,24 @@ whereas prematurely fixing the product output would make them harder.
   no new run, runtime change, or deployment. The user subsequently approved the
   written spec and requested its implementation handoff plan; daily-output
   acceptance remains pending until the actual page is inspected.
+
+## Baseline corrections before integration — 2026-08-31
+
+- Fixed window selection to use the latest 60 consecutive retained dates,
+  divided into adjacent 30-day windows. More history no longer separates the
+  previous and current windows; a missing date in the required interval fails
+  rather than silently changing the comparison period.
+- Removed the uncomputed `change_score: 0` field from prominence JSON rows.
+  Ranking B retains its existing formula and score field. This is an artifact
+  correction, not a new ranking experiment.
+- The regression checks first reproduced the old-window selection, accepted
+  gap, and fabricated score. The focused suite then passed all seven tests;
+  the full suite passed all 32 tests. Locked dependency synchronization and
+  diff checks also passed; no dependency or collection changes were made.
+- Replayed the retained 2026-07-01..08-29 input once into ignored
+  `artifacts/wikimedia_phase1_premerge/`. Comparison with the original artifact
+  confirmed identical windows, prominence names/order/view means, and complete
+  Ranking B rows. Only the unused prominence score field differs. The original
+  artifacts remain untouched.
+- Phase 2 runtime implementation and daily-page human acceptance remain
+  separate follow-up work under the approved design and implementation plan.

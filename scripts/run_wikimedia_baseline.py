@@ -2,8 +2,8 @@
 
 Source-local baseline derived from the retained daily Wikipedia top-page
 files. Views participate; the earlier document-frequency ranking is not
-reused. Two fixed 30-day windows: first half is previous, second half is
-current.
+reused. The latest 60 consecutive retained dates form two adjacent 30-day
+windows: first half is previous, second half is current.
 """
 
 import argparse
@@ -45,13 +45,13 @@ def load_days(data_root: Path) -> dict[date, list[dict[str, object]]]:
 
 
 def split_windows(days: list[date]) -> tuple[list[date], list[date]]:
+    days = sorted(set(days))
     if len(days) < 2 * WINDOW_DAYS:
         raise ValueError(f"need at least {2 * WINDOW_DAYS} days, got {len(days)}")
-    prev = days[:WINDOW_DAYS]
-    cur = days[-WINDOW_DAYS:]
-    if prev[-1] >= cur[0]:
-        raise ValueError("windows overlap")
-    return prev, cur
+    latest = days[-2 * WINDOW_DAYS:]
+    if latest[-1] - latest[0] != timedelta(days=2 * WINDOW_DAYS - 1):
+        raise ValueError("latest 60 days must be consecutive; missing snapshots")
+    return latest[:WINDOW_DAYS], latest[WINDOW_DAYS:]
 
 
 def aggregate(
@@ -104,17 +104,17 @@ def main() -> int:
     mean_cur = aggregate(days, cur)
 
     def row(
-        rank: int, name: str, change: float
+        rank: int, name: str, change: float | None = None
     ) -> dict[str, object]:
-        return {
+        result = {
             "rank": rank,
             "page": name,
             "mean_views_previous": round(mean_prev.get(name, 0.0), 4),
             "mean_views_current": round(mean_cur.get(name, 0.0), 4),
-            "change_score": round(change, 4),
         }
-
-    prominent = [(rank, name, 0.0) for rank, (name, _) in enumerate(rank_prominent(mean_cur), 1)]
+        if change is not None:
+            result["change_score"] = round(change, 4)
+        return result
 
     result = {
         "source": "wikimedia_pageviews_top",
@@ -138,7 +138,9 @@ def main() -> int:
             "unique_pages": len(set(mean_prev) | set(mean_cur)),
         },
         "rankings": {
-            "prominent": [row(r, n, 0.0) for r, n, _ in prominent],
+            "prominent": [
+                row(r, n) for r, (n, _) in enumerate(rank_prominent(mean_cur), 1)
+            ],
             "increased": [
                 row(r, n, c)
                 for r, (n, c) in enumerate(rank_increased(mean_prev, mean_cur), 1)
