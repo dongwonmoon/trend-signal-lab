@@ -10,8 +10,10 @@ Trend Signal Lab v0 with replayable Korean Wikipedia daily pageview inputs.
 The slice collects one explicit UTC date range locally. It does not define the
 final ranking, UI, deployment runtime, or multi-source product contract.
 
-The selected source is Wikimedia Analytics API daily top pages for
-`ko.wikipedia.org`. This measures attention within Korean Wikipedia readership,
+The selected source is Wikimedia Analytics API daily top pages for the request
+project `ko.wikipedia.org`. The API response identifies the same project as
+`ko.wikipedia`; the collector validates that documented response value rather
+than assuming the request and response strings are identical. This measures attention within Korean Wikipedia readership,
 not Korean-population interest or culture-wide prevalence. Analytics API data is
 CC0 and requests must use an identifying User-Agent; those source facts and the
 broader candidate comparison are recorded in
@@ -100,7 +102,8 @@ for a 60-request local bootstrap and avoids a retry or job framework.
 
 Before writing, require:
 
-- exactly one response item for the requested project and date;
+- exactly one response item with `project` equal to `ko.wikipedia`, `access`
+  equal to `all-access`, and the requested date;
 - a non-empty article list;
 - non-empty article names;
 - integer, non-negative view counts;
