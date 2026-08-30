@@ -148,11 +148,11 @@ article is empty or not a string
 views has exact type other than int, or is negative
 rank has exact type other than int, or is not positive
 article names repeat
-ranks repeat or are not exactly 1..N
 ```
 
 Return new article dictionaries containing only `article`, `views`, and `rank`,
-sorted by rank.
+sorted by source rank. Preserve tied or skipped source rank values; do not
+normalize them.
 
 `collect_day()` must:
 
@@ -219,7 +219,8 @@ uv run python scripts/collect_wikimedia.py \
   --output-dir /tmp/trend-signal-wikimedia-smoke
 ```
 
-Expected: one file is written with a non-empty, contiguous ranked article list.
+Expected: one file is written with a non-empty ranked article list; source rank
+ties or gaps are preserved.
 If network access fails, report the exact failure without weakening validation
 or adding retry infrastructure. Do not run the 60-day backfill.
 

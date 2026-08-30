@@ -68,7 +68,6 @@ def validate_response(raw: bytes, requested_day: date) -> list[dict[str, object]
         raise _error("articles must be a non-empty list")
     result: list[dict[str, object]] = []
     names: set[str] = set()
-    ranks: list[int] = []
     for article in articles:
         if not isinstance(article, dict):
             raise _error("article entry must be an object")
@@ -84,10 +83,7 @@ def validate_response(raw: bytes, requested_day: date) -> list[dict[str, object]
         if name in names:
             raise _error("article names repeat")
         names.add(name)
-        ranks.append(rank)
         result.append({"article": name, "views": views, "rank": rank})
-    if sorted(ranks) != list(range(1, len(ranks) + 1)):
-        raise _error("ranks must be exactly 1..N")
     return sorted(result, key=lambda entry: entry["rank"])
 
 

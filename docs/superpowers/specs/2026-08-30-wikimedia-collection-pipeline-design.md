@@ -108,8 +108,9 @@ Before writing, require:
 - non-empty article names;
 - integer, non-negative view counts;
 - positive integer ranks;
-- unique article names and ranks within the day;
-- ranks forming a contiguous sequence starting at one.
+- unique article names; source ranks must be positive integers. Wikimedia can
+  emit tied or skipped rank numbers, so the collector preserves source ranks
+  without normalization.
 
 HTTP errors, timeouts, invalid JSON, date mismatches, or validation failures
 must not create or replace the final file. An existing accepted file is never
