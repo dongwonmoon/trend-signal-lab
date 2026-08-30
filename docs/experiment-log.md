@@ -233,3 +233,56 @@ This is a recommendation to graduate from pure feasibility research into data
 collection, not a claim that detection quality is finished. The distinction is
 important: accumulating replayable data helps the remaining experiments,
 whereas prematurely fixing the product output would make them harder.
+
+# Phase 1 Wikimedia signal acceptance
+
+## Execution — 2026-08-30
+
+- Input: retained `data/raw/wikimedia/ko.wikipedia.org/*.json`, 60 daily
+  snapshots 2026-07-01..2026-08-29, missing days none. July 29, which
+  temporarily returned 404, is present in the retained set.
+- Windows: previous 2026-07-01..07-30, current 2026-07-31..08-29, both 30
+  days, split as first/last half of the retained day list.
+- Process: per page, mean daily views inside each window (views summed, divided
+  by present-day count). Prominence = current-window mean. Increase = log2
+  smoothed change with a 1.0 pseudo-count. Top 20 lists each. No threshold,
+  stopword, or system-page filtering.
+- Script `scripts/run_wikimedia_baseline.py`, tests
+  `tests/test_wikimedia_baseline.py` (5 tests, suite total 30 passed).
+- Determinism: two clean runs produced identical JSON
+  (`e2190031...591f`) and Markdown (`7a54dc49...d9c2`) SHA-256 hashes.
+- Output: ignored `artifacts/wikimedia_phase1/results.{json,md}`.
+
+## Observed top 20 — prominence (mean views/day, current window)
+
+```text
+위키백과:대문, 문화방송, 특수:검색, 한국방송공사, 안상호, 한국교육방송공사,
+하영, 5·18_광주_민주화_운동, 트로이_전쟁, 오디세이_(영화), 친일반민족행위_705인_명단,
+리센느, 유튜브, 이완용, 파일:XHamster_logo.svg, 특수:최근바뀜, 오디세이아,
+정해인, 여성_사정, 사랑이_온다_(드라마)
+```
+
+## Observed top 20 — increased attendance (prev -> current)
+
+```text
+안상호, 친일반민족행위_705인_명단, 아가멤논, 위키백과:2026년_아시안_게임_에디터톤/럭비_챌린지,
+이런_엿_같은_사랑, 친일파_708인_명단, 안병문, 네팔, 안정호, 맷_데이먼,
+대정실업친목회, 트로이, 헬레네, 민족문제연구소의_친일인명사전_수록자_명단,
+친일파_명단, 안건영, 유리의_성_(드라마), 여한구, 백인천, 박찬홍
+```
+
+## Provisional interpretation
+
+- The prominence list is readable and plausible and already surfaces an
+  anticipated anchor (`리센느` at rank 12). Increased-attendance is dominated
+  by pages that were absent from the previous window (`mean prev = 0`), each
+  with a near-maximum change score, so ranks 1-20 are informative about which
+  pages appeared but not yet about relative growth intensity.
+- System pages (`위키백과:대문`, `특수:검색`, `특수:최근바뀜`, Ediathon
+  namespace, the `파일:` media page) and `_`-joined page names remain visible
+  as source-local artifacts; they are recorded, not tuned away.
+- This is a source-local baseline inside Korean Wikipedia readership. It is not
+  a measure of Korean culture-wide prevalence and does not fix a final score,
+  UI, or product contract.
+- Phase 2 (single-source local product slice) is not yet approved to start;
+  the next wait is human judgment on these two lists.
