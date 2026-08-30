@@ -29,7 +29,7 @@
 - Consumes: Wikimedia daily-top JSON from `https://wikimedia.org/api/rest_v1/metrics/pageviews/top/ko.wikipedia.org/all-access/YYYY/MM/DD`.
 - Produces: `endpoint_url(day: date) -> str`.
 - Produces: `validate_response(raw: bytes, requested_day: date) -> list[dict[str, object]]`.
-- Produces: `collect_day(day: date, output_root: Path, *, fetcher: Callable[[date], bytes] = fetch_day, now: Callable[[], datetime] = utc_now) -> str`, returning `"written"` or `"skipped"`.
+- Produces: `collect_day(day: date, output_root: Path, *, fetcher: Callable[[date], bytes] = fetch_day, now: Callable[[], datetime] = utc_now) -> str`, returning `"written"`, `"skipped"`, or `"missing"` for a source `404`.
 - Produces: CLI flags `--start YYYY-MM-DD`, optional `--end YYYY-MM-DD`, and optional `--output-dir` defaulting to `data/raw/wikimedia`.
 
 - [x] **Step 1: Write the focused failing test**
@@ -235,8 +235,17 @@ git commit -m "feat: collect wikimedia daily pageviews"
 
 ### Verification record (2026-08-30)
 
-- Focused test: `1 passed`; full suite: `24 passed`.
+- Focused test: `2 passed`; full suite: `25 passed` after adding observable
+  source-`404` handling.
 - Bounded live smoke for `2024-01-01` wrote 996 articles and preserved 200
   tied-rank groups; no 60-day run was performed.
 - `data/raw/wikimedia/ko.wikipedia.org/2026-08-29.json` is ignored, and the
   branch diff check is clean.
+- The first historical backfill observed a transient source `404` on
+  `2026-07-29` while adjacent dates returned `200`; a later request for the same
+  date returned `200`. The collector now reports a current `404` as `missing`,
+  continues without an empty file so a rerun can recover it, and fails a range
+  in which every requested day is missing.
+- A bounded `2026-07-28` through `2026-07-30` live run produced
+  `written → missing → written`; the later single-day retry recovered
+  `2026-07-29` as `written`.

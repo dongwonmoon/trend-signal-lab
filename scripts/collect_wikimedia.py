@@ -1,10 +1,12 @@
 import argparse
 import json
 import os
+import sys
 import tempfile
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Callable
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 
@@ -104,7 +106,13 @@ def collect_day(
     target = output_root / API_PROJECT / f"{day.isoformat()}.json"
     if target.exists():
         return "skipped"
-    articles = validate_response(fetcher(day), day)
+    try:
+        raw = fetcher(day)
+    except HTTPError as exc:
+        if exc.code == 404:
+            return "missing"
+        raise
+    articles = validate_response(raw, day)
     stored = {
         "source": SOURCE,
         "project": API_PROJECT,
@@ -145,9 +153,16 @@ def main() -> int:
     if end < start:
         parser.error("--end must not be before --start")
     current = start
+    available = 0
     while current <= end:
-        print(f"{current.isoformat()} {collect_day(current, Path(args.output_dir))}")
+        status = collect_day(current, Path(args.output_dir))
+        print(f"{current.isoformat()} {status}")
+        if status != "missing":
+            available += 1
         current = date.fromordinal(current.toordinal() + 1)
+    if available == 0:
+        print("error: no Wikimedia data was available for the requested range", file=sys.stderr)
+        return 1
     return 0
 
 

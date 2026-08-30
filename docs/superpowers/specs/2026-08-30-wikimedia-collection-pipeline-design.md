@@ -27,7 +27,8 @@ broader candidate comparison are recorded in
 - Store one validated source-local JSON file per UTC day under
   `data/raw/wikimedia/ko.wikipedia.org/`.
 - Skip an already accepted day so reruns resume rather than duplicate work.
-- Stop on the first failed or invalid day without damaging accepted files.
+- Report a source `404` as a missing day and continue without creating a file;
+  stop on other failed or invalid days without damaging accepted files.
 - Verify one live day before the user runs the 60-day backfill.
 
 Ranking, a scheduler, UI, deployment, and additional sources are outside this
@@ -94,9 +95,12 @@ For each day the collector:
 5. writes a temporary file in the destination directory;
 6. atomically replaces the final path.
 
-There is no automatic retry or concurrency. A failed run exits non-zero; a
-later rerun skips accepted days and resumes at the missing day. This is enough
-for a 60-request local bootstrap and avoids a retry or job framework.
+There is no automatic retry or concurrency. A source `404` returns `missing`
+and leaves the date path absent so a later rerun checks it again. Other failed
+days exit non-zero, and a range with no available or previously accepted days
+also fails rather than reporting false success. A later rerun skips accepted
+days. This is enough for a 60-request local bootstrap and avoids a retry or job
+framework.
 
 ## Validation and failure boundary
 
@@ -112,9 +116,10 @@ Before writing, require:
   emit tied or skipped rank numbers, so the collector preserves source ranks
   without normalization.
 
-HTTP errors, timeouts, invalid JSON, date mismatches, or validation failures
-must not create or replace the final file. An existing accepted file is never
-refreshed in this slice.
+A source `404` is an observable missing day, not an empty snapshot. Other HTTP
+errors, timeouts, invalid JSON, date mismatches, or validation failures stop the
+run. None may create or replace the final file. An existing accepted file is
+never refreshed in this slice.
 
 ## Verification
 
