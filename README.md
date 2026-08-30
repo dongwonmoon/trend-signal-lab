@@ -67,3 +67,24 @@ Ranking B reuses E001's candidate extraction, minimum support of five, and
 comparable with YouTube daily-snapshot support. This is an SBS editorial lens,
 not a representative measure of overall cultural attention, and no scores are
 combined across sources.
+
+## Wikimedia Phase 2 daily page
+
+Generate the local daily popular-keyword JSON for the latest retained completed
+UTC day:
+
+```sh
+uv run python -m scripts.build_wikimedia_page
+```
+
+Or replay an explicit completed UTC date:
+
+```sh
+uv run python -m scripts.build_wikimedia_page --date 2026-08-29
+```
+
+The default picks the newest retained snapshot strictly before the current UTC
+date; there is no automatic collection, refresh, or server. The result lives in
+the ignored `artifacts/wikimedia_phase2/` directory. The page shows one UTC
+day's views inside Korean Wikipedia readership, not Korean population attention,
+and older experiments remain historical evidence rather than the current list.
