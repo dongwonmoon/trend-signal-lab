@@ -326,3 +326,37 @@ whereas prematurely fixing the product output would make them harder.
   artifacts remain untouched.
 - Phase 2 runtime implementation and daily-page human acceptance remain
   separate follow-up work under the approved design and implementation plan.
+
+# Phase 2 Local daily popular-keyword page
+
+## Execution — 2026-08-31
+
+- Integrated after Phase 1 human judgment: the user approved a local static
+  `인기 키워드` page using one completed UTC day ranked by views.
+- Generator `scripts/build_wikimedia_page.py` selects the latest retained
+  snapshot strictly before the current UTC date, validates the stored
+  contract (source/project/snapshot_date/UTC/request_url/collected_at,
+  article rows, unique names, integer views/ranks), excludes exact
+  `위키백과:`, `특수:`, `파일:` prefixes, ranks by daily views with name
+  tiebreak, and writes `results.json` then `index.html` atomically.
+- Smoke generated for the latest retained day (2026-08-29) and two earlier
+  retained days (2026-08-28, 2026-08-27) into ignored
+  `artifacts/wikimedia_phase2/` directories. Re-running produced byte-identical
+  JSON and HTML for a fixed day.
+- Observed top-10, daily views (latest first): 문화방송 16,157; 한국방송공사
+  10,222; 한국교육방송공사 8,685; 이용주 (배우) 6,235; 네팔 4,569; 이용주
+  (희극인) 4,108; 5·18 광주 민주화 운동 3,673; 비비 (대한민국의 가수) 3,087;
+  트로이 전쟁 2,858; 사랑이 온다 (드라마) 2,733.
+- The 2026-08-29 page was opened in a real browser for layout and readability;
+  actual human usefulness judgment remains the user's call and is the closing
+  condition for Phase 2.
+
+## Limitations
+
+- Two distinct `이용주` pages (배우/희극인) both appear; no alias merging.
+- Broadcasting names (문화방송/한국방송공사/한국교육방송공사) dominate the
+  top of daily lists; they are not removed by the approved prefix policy.
+- `5·18 광주 민주화 운동` shows the `_` replaced by spaces in display only;
+  source identity remains the underscore title.
+- These are smoke observations, not preregistered quality evidence. Phase 2 is
+  complete when the user judges a daily list worth browsing.

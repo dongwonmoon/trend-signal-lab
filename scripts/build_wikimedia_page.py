@@ -6,6 +6,7 @@ network access, no 30-day aggregation, and no growth score.
 """
 
 import argparse
+import html
 import json
 import os
 import sys
@@ -137,6 +138,51 @@ def build_result(snapshot: dict) -> dict:
     }
 
 
+def render_html(result: dict) -> str:
+    escape = html.escape
+
+    def rows() -> str:
+        if not result["items"]:
+            return (
+                '<tr><td colspan="3">'
+                "표시할 항목이 없습니다"
+                "</td></tr>"
+            )
+        return "".join(
+            f'<tr><td>{item["rank"]}</td>'
+            f'<td>{escape(item["page"].replace("_", " "))}</td>'
+            f'<td>{item["views"]:,}</td></tr>'
+            for item in result["items"]
+        )
+
+    return f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인기 키워드</title>
+<style>
+body {{ font-family: sans-serif; margin: 2rem auto; max-width: 40rem; padding: 0 1rem; }}
+table {{ border-collapse: collapse; width: 100%; }}
+th, td {{ border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; }}
+th {{ background: #f2f2f2; }}
+</style>
+</head>
+<body>
+<h1>인기 키워드</h1>
+<p>{escape(result["project"])} — {escape(result["snapshot_date"])} (UTC), {escape(result["ranking"])}</p>
+<p>한국어 위키백과 조회수 기준</p>
+<table>
+<thead><tr><th>순위</th><th>키워드</th><th>조회수</th></tr></thead>
+<tbody>
+{rows()}
+</tbody>
+</table>
+</body>
+</html>
+"""
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", default="data/raw/wikimedia/ko.wikipedia.org")
@@ -159,11 +205,16 @@ def main(argv: list[str] | None = None) -> int:
         json_text = (
             json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         )
+        html_text = render_html(json.loads(json_text))
         write_atomic(Path(args.output_dir) / "results.json", json_text)
+        write_atomic(Path(args.output_dir) / "index.html", html_text)
     except (ValueError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
-    print(f"wrote {Path(args.output_dir) / 'results.json'} for {result['snapshot_date']}")
+    print(
+        f"wrote {Path(args.output_dir) / 'results.json'} "
+        f"and {Path(args.output_dir) / 'index.html'} for {result['snapshot_date']}"
+    )
     return 0
 
 

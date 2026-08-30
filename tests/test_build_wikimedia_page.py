@@ -64,3 +64,47 @@ def test_invalid_snapshot_does_not_replace_accepted_json(tmp_path):
     assert page.main(["--data-root", str(root), "--date", "2026-08-29",
                       "--output-dir", str(out)]) != 0
     assert accepted.read_text(encoding="utf-8") == "accepted"
+
+
+def test_page_escapes_source_text_and_handles_empty_results():
+    result = page.build_result(stored(date(2026, 8, 29), [
+        {"article": "<script>_&_주제", "views": 20, "rank": 1},
+    ]))
+    html = page.render_html(result)
+    for label in ["인기 키워드", "한국어 위키백과 조회수 기준", "2026-08-29", "UTC"]:
+        assert label in html
+    assert "<script>" not in html
+    assert "&lt;script&gt; &amp; 주제" in html
+    assert "<th" in html
+    assert result["items"][0]["page"] == "<script>_&_주제"
+    result["items"] = []
+    assert "표시할 항목이 없습니다" in page.render_html(result)
+
+
+def test_build_is_repeatable_and_failure_preserves_page(tmp_path, monkeypatch):
+    root, out = tmp_path / "raw", tmp_path / "out"
+    root.mkdir()
+    raw = root / "2026-08-29.json"
+    raw.write_text(json.dumps(stored(date(2026, 8, 29), [
+        {"article": "가_주제", "views": 20, "rank": 1},
+    ])), encoding="utf-8")
+    args = ["--data-root", str(root), "--date", "2026-08-29", "--output-dir", str(out)]
+    assert page.main(args) == 0
+    files = [out / "results.json", out / "index.html"]
+    accepted = [p.read_bytes() for p in files]
+    assert page.main(args) == 0
+    assert [p.read_bytes() for p in files] == accepted
+    real_replace = page.os.replace
+
+    def reject_html(source, destination):
+        if destination == files[1]:
+            raise OSError("simulated publication failure")
+        return real_replace(source, destination)
+
+    monkeypatch.setattr(page.os, "replace", reject_html)
+    assert page.main(args) != 0
+    assert files[1].read_bytes() == accepted[1]
+    assert sorted(p.name for p in out.iterdir()) == ["index.html", "results.json"]
+    raw.write_text("invalid", encoding="utf-8")
+    assert page.main(args) != 0
+    assert [p.read_bytes() for p in files] == accepted

@@ -85,6 +85,14 @@ uv run python -m scripts.build_wikimedia_page --date 2026-08-29
 
 The default picks the newest retained snapshot strictly before the current UTC
 date; there is no automatic collection, refresh, or server. The result lives in
-the ignored `artifacts/wikimedia_phase2/` directory. The page shows one UTC
-day's views inside Korean Wikipedia readership, not Korean population attention,
-and older experiments remain historical evidence rather than the current list.
+the ignored `artifacts/wikimedia_phase2/` directory as `results.json` plus a
+self-contained `index.html` that needs no server or frontend build:
+
+```sh
+open artifacts/wikimedia_phase2/index.html
+```
+
+The page shows one UTC day's views inside Korean Wikipedia readership, not
+Korean population attention, and older experiments remain historical evidence
+rather than the current list. Generation fails visibly rather than serving a
+stale page, and an existing page is preserved if a later generation fails.
