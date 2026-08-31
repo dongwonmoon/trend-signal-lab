@@ -1,7 +1,7 @@
 # Trend Signal Lab Product Roadmap Design
 
 **Date:** 2026-08-30
-**Status:** Approved roadmap; only the current phase may be planned in detail
+**Status:** Approved roadmap; priorities revised with the user on 2026-08-31
 
 ## Purpose
 
@@ -10,9 +10,9 @@ workspace to a small public product. It explains why each phase exists, what
 decision it must enable, and what evidence permits the next phase to begin.
 
 It is deliberately not a backlog for the whole product. Later task lists would
-encode assumptions that have not yet been tested. Only the active phase gets an
-implementation plan; later phases remain outcome and gate descriptions until
-the preceding phase closes.
+encode assumptions that have not yet been tested. Only explicitly active work
+gets a detailed plan. Phase numbers are stable references, not an obligation to
+execute every phase serially; the current priorities below govern sequencing.
 
 ## Current evidence and stage transition
 
@@ -69,9 +69,10 @@ for imitation merely because the analogy is useful.
 
 Three broad sequences were considered:
 
-1. **Vertical slice first — selected.** Make one source produce one real user
-   experience, publish it, then expand only where observed limitations require
-   it.
+1. **Vertical slice first — selected, sequence revised.** Keep one source's
+   usable local path, address observed ranking and coverage limits, then publish
+   when the user accepts the list's purpose and limitations. A second-source
+   investigation need not wait for deployment or keyword detail.
 2. **Data platform first — rejected for now.** A generic multi-source pipeline
    would be tidy but would freeze abstractions before a second source and user
    need prove them necessary.
@@ -79,8 +80,56 @@ Three broad sequences were considered:
    experiments remain valuable, but requiring a clean final ranking before any
    product work would turn an open-ended quality problem into a launch blocker.
 
-The selected strategy optimizes for a reversible public vertical slice. It
-does not lower the evidence standard for data integrity or source claims.
+The selected strategy optimizes for a reversible product path, not automatic
+promotion from a working page to public deployment. It does not lower the
+evidence standard for data integrity or source claims.
+
+## Current priorities — 2026-08-31
+
+The daily-view page implements its approved narrow design, but the user expected
+the temporal signal explored earlier to reach the product. The page currently
+uses no previous-period comparison. A working data-to-page path is useful
+engineering progress, not acceptance that its list is the intended product.
+Preserve the page, collector, and historical outputs rather than restarting.
+
+Two bounded workstreams may now proceed independently:
+
+- **List refinement design (Phase 2 follow-up):** define how daily interest is
+  compared with a preceding baseline and how unobserved historical top-list
+  entries are handled. Reuse the existing B approach where its assumptions fit;
+  do not equate top-list absence with zero actual views. Keep A as a reference
+  rather than declaring sustained popularity irrelevant. The comparison period,
+  missing-observation policy, and final presentation still require approval.
+- **Second-source investigation (Phase 5 discovery only):** reuse prior research,
+  assess complementary coverage, and inspect a small permitted sample from one
+  promising candidate. This is not approval for a collector, source fusion, or
+  a generic ingestion platform. No particular candidate has been selected.
+
+Phase 3 public deployment and page auto-refresh are on hold. Phase 4 detail is
+not a prerequisite for these workstreams; Phases 6 and 7 remain later outcomes.
+Reconsider deployment after inspecting an actual list whose purpose and limits
+the user accepts, or if the user explicitly chooses an earlier limited release.
+Neither a perfect top 20 nor a mandatory number of sources is an exit gate.
+
+Source expansion need not wait for a finished Process. A sufficient starting
+point is understood measurement semantics, replayable records, known collection
+failure/coverage limits, and at least some interpretable source-local output.
+This does not claim long-term operational stability. Keep the existing input
+fixed when assessing a processing change; evaluate a new source with its own
+appropriate simple process. Parallel development is allowed, but changing both
+and attributing the output difference to only one is not valid evidence.
+
+Immediate 60-day backfill is no longer a universal source-selection gate; it
+came from the earlier 30-day-versus-30-day experiment. Record actual history,
+retention, freshness, and time until a useful comparison can be made. Keep
+identity, event time, acquisition, storage, and public-use conditions explicit;
+postponing deployment does not waive permission checks. If a candidate cannot
+be backfilled, report whether a small periodic capture is needed to avoid losing
+future history. That collection decision is separate from page auto-refresh
+and requires approval before implementation.
+
+The two handoff prompts below prepare decisions, not runtime changes. Detailed
+implementation plans follow only after the relevant design/source approval.
 
 ## Phase map
 
@@ -134,6 +183,11 @@ approved the written spec; its linked implementation plan defines the two
 sequential tasks. Track execution there and daily-output acceptance in the
 experiment log, separately from design approval.
 
+**Current follow-up:** The daily-view implementation remains a baseline. The
+current-priorities section now advances temporal-ranking design before treating
+the list as ready for public release; it does not retroactively change what the
+original implementation was asked to do.
+
 **Exit evidence:** A user can open the page, understand what is current, and
 judge whether browsing the list is interesting. The generation path is
 repeatable from retained input without manual data editing.
@@ -142,6 +196,9 @@ repeatable from retained input without manual data editing.
 report, or the UI requires a product contract that Phase 1 did not establish.
 
 ### Phase 3 — Publish and refresh daily
+
+**Sequencing:** On hold under the current priorities; not the automatic next
+step after a technically working Phase 2 page.
 
 **Purpose:** Turn the local slice into a real product and observe operational
 failures that a local demonstration cannot reveal.
@@ -175,6 +232,10 @@ that the list alone cannot answer, such as whether attention is persistent or a
 short spike.
 
 ### Phase 5 — Add a second source without fusion
+
+**Sequencing:** Candidate research and a bounded permitted sample may run in
+parallel with Phase 2 refinement, before Phases 3 and 4. Collector/ranking
+implementation requires a separate source-specific approval afterward.
 
 **Purpose:** Test whether another lens adds useful information and learn the
 first real cross-source boundary before designing a generic pipeline.
@@ -238,8 +299,9 @@ service a complete measure of Korean culture.
 
 ## Phase planning and handoff contract
 
-Only the active phase receives a task-level implementation plan. Each task must
-state:
+Only explicitly active, approved implementation work receives a task-level
+implementation plan. Research/design briefs may proceed in parallel without
+authorizing code. Each implementation task must state:
 
 - its user- or decision-facing purpose;
 - owned files and explicit non-goals;
@@ -264,6 +326,53 @@ Each task or coherent checkpoint reports:
 A higher-cost reviewer is most valuable at an irreversible structural boundary
 and at the final phase diff. Routine implementation does not require that
 reviewer when the task contract, evidence, and rollback boundary are clear.
+
+### Handoff A — Daily temporal-ranking design
+
+Owner: main/product-design session. Runtime code and raw files are read-only;
+return a proposal for discussion, then update the Phase 2 design only after
+approval. Do not let this workstream edit the source-research owner's document.
+
+```text
+Trend Signal Lab의 기존 일별 화면에 관심 변화 B를 연결할 최소 설계를 검토해줘.
+AGENTS.md, docs/superpowers/specs/2026-08-30-product-roadmap-design.md의 Current priorities,
+docs/superpowers/specs/2026-08-31-phase2-local-popular-keywords-design.md,
+scripts/build_wikimedia_page.py와 scripts/run_wikimedia_baseline.py를 먼저 읽어.
+목적은 단순 조회수 순위와 평소 대비 관심 변화를 구분하는 것이다.
+기존 수집기·화면·A 결과는 보존하고, 새 NLP나 통합 점수를 만들지 마.
+핵심 결정은 비교 기간과 이전 상위 목록 미관측 처리다.
+미관측을 실제 조회수 0으로 취급하지 말고, 보관 데이터로 가능한 범위를 확인해.
+비교 기준 후보를 2개 이내로 제시하고, 각각의 의미·한계·필요 데이터를 설명해.
+A를 참조로 유지하면서 B를 보여줄 최소안과, 그 안이 틀렸음을 확인할 방법을 제안해.
+기간·정책·표현을 임의로 확정하거나 코드를 수정하지 마.
+짧은 추천안과 사용자가 결정해야 할 사항을 반환하고, 승인 후에만 구현 계획을 작성해.
+```
+
+### Handoff B — Complementary second-source investigation
+
+Owner: one low-cost researcher (Luna if delegated here). May append dated findings
+only to `docs/superpowers/specs/2026-08-30-public-culture-source-research.md`;
+no runtime/roadmap edits.
+Final product and source-permission decisions remain with the main session/user.
+
+```text
+Trend Signal Lab에서 위키백과가 놓치는 정보를 줄 두 번째 소스를 조사해줘.
+AGENTS.md, docs/superpowers/specs/2026-08-30-product-roadmap-design.md의 Current priorities와
+docs/superpowers/specs/2026-08-30-public-culture-source-research.md부터 읽어.
+기존 조사를 재사용하고, 후보 검토는 최대 3개, 실제 작은 샘플 확인은 후보 1개로 제한해.
+60일 즉시 확보는 필수가 아니다. 실제 제공 기간·보존 기간·관측 주기를 기록해.
+무엇을 측정하는지(조회·검색·언급·판매 등), 위키와 다른 정보가 무엇인지 구분해.
+행별 식별자·이벤트 시각·출처, 수집 및 보관 조건, 향후 공개 이용 조건을 확인해.
+현재 1차 출처 링크와 확인 날짜를 남기고, 과거 조사 결론을 영구적인 허가/금지로 단정하지 마.
+접근·검토가 허용되는 후보라면 5~20행 정도만 확인해 필드·중복·시간 범위를 보고해.
+샘플은 접근성과 구조의 증거이지 대표성이나 트렌드 품질의 증거가 아니다.
+키·승인이 없으면 우회하지 말고 한계를 보고해. 새 가입·비용·수집기·대량 다운로드는 금지한다.
+검토하지 않은 원문·개인정보·비밀값을 저장하거나 커밋하지 마.
+과거 데이터가 없다면 최소 주기 수집이 필요한지만 보고하고 직접 시작하지 마.
+소스별 Process 변경 필요성도 적되, 기존 점수와 합치거나 전체 구조를 설계하지 마.
+기존 조사 문서에 새 날짜의 근거·샘플 관찰·가설·남은 조건을 구분해 추가하고,
+추천 후보 하나 또는 적합한 후보 없음으로 간결히 보고해. 소스 채택은 사용자가 결정한다.
+```
 
 ## Roadmap revision triggers
 

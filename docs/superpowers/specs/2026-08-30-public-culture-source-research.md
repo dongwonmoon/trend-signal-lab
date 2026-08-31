@@ -1,5 +1,19 @@
 # Public culture source gate — 2026-08-30
 
+## Scope update — 2026-08-31
+
+The [roadmap's current priorities](2026-08-30-product-roadmap-design.md#current-priorities--2026-08-31)
+advance second-source investigation before public deployment. The findings below
+remain dated historical evidence, not a new approval or permanent rejection.
+For the next investigation, immediate 60-day backfill is not mandatory: record
+actual history and acquisition cadence instead. Identity, event time, retention,
+and permission checks remain required; delayed deployment does not grant data
+rights. Verify current first-party conditions before recommending adoption.
+
+The original gates and candidate findings are preserved to explain earlier
+choices. No source has been newly researched, sampled, or selected by this
+documentation update. Handoff B in the roadmap defines the bounded next task.
+
 ## Decision
 
 No single evaluated candidate clears all five original gates at the requested
@@ -16,7 +30,7 @@ fuse sources or scores.
 
 Access date for every source below: **2026-08-30**.
 
-## Gates
+## Original gates — 2026-08-30
 
 1. Korean culture/entertainment relevance.
 2. At least the most recent 60 days can be backfilled immediately.

@@ -360,3 +360,30 @@ whereas prematurely fixing the product output would make them harder.
   source identity remains the underscore title.
 - These are smoke observations, not preregistered quality evidence. Phase 2 is
   complete when the user judges a daily list worth browsing.
+
+## Product review and sequencing decision — 2026-08-31
+
+- Review found that the page follows its approved daily-view design, but the
+  user expected the temporal signal explored earlier to reach the product.
+  Technical implementation is not acceptance of that narrower product scope.
+- Focused Phase 2 tests passed (4 tests). Direct replay through the current
+  generator matched all three retained JSON artifacts for August 27, 28, and
+  29. Their first three entries were the same broadcasting organizations. This
+  demonstrates the observed daily rankings, not their cause or wider prevalence.
+- The review did not repeat a browser inspection. The implementation report
+  records only August 29's browser check; the earlier two dates' visual checks
+  and the original plan's checkbox reconciliation remain unverified. No new
+  full-suite run or product-acceptance claim is implied here.
+- The user approved holding deployment/page auto-refresh and preparing two
+  parallel tasks: daily temporal-ranking design and a complementary second-
+  source investigation with one bounded sample. Periods, missing-observation
+  policy, source choice, and new runtime work are not approved by this decision.
+- Immediate 60-day backfill is no longer a universal candidate gate. Acquisition,
+  storage, event-time, and permission boundaries remain. A future-only source
+  may require periodic capture, which must be proposed separately rather than
+  silently equated with public page refresh.
+- Keep the existing collector, daily page, A reference, and historical B
+  artifacts. Source-local development may proceed in parallel without fusing
+  data or requiring final Process quality first. The [roadmap](superpowers/specs/2026-08-30-product-roadmap-design.md)
+  owns the revised priorities and two handoff prompts. This decision update
+  makes no code change and performs no new source collection.

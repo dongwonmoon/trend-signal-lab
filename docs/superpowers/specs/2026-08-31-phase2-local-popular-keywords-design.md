@@ -5,6 +5,13 @@
 **Parent:** [Product roadmap](2026-08-30-product-roadmap-design.md)
 **Plan:** [Implementation handoff](../plans/2026-08-31-phase2-local-popular-keywords.md)
 
+**Follow-up decision — 2026-08-31:** This document remains the contract for the
+implemented daily-view baseline. The user has not accepted that baseline as a
+sufficient trend product. The [roadmap's current priorities](2026-08-30-product-roadmap-design.md#current-priorities--2026-08-31)
+now advance temporal-ranking design and second-source investigation in parallel,
+with deployment on hold. Comparison period, unobserved-entry treatment, and the
+follow-up display are not yet approved; this note authorizes no ranking change.
+
 ## Purpose and decision
 
 Turn retained Wikimedia data into a small, real browsing experience: open a
@@ -155,9 +162,10 @@ not silently tune until it looks positive.
 
 ## Deferred decisions and reconsideration triggers
 
-- **Growth B and persistent-versus-rising presentation:** revisit when choosing
-  how users should distinguish those signals. Missing historical top-list rows
-  must not become claims of zero audience interest.
+- **Growth B and persistent-versus-rising presentation:** now an active design
+  follow-up under the roadmap, not an implemented feature of this baseline.
+  Missing historical top-list rows must not become claims of zero audience
+  interest. The comparison and presentation decisions remain open.
 - **Weekly/monthly views:** revisit after the daily view is useful and a longer
   period answers a concrete user question.
 - **Semantic filtering and namespace expansion:** revisit observed errors, not
