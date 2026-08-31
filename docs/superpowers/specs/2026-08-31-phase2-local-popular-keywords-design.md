@@ -8,9 +8,10 @@
 **Follow-up decision — 2026-08-31:** This document remains the contract for the
 implemented daily-view baseline. The user has not accepted that baseline as a
 sufficient trend product. The [roadmap's current priorities](2026-08-30-product-roadmap-design.md#current-priorities--2026-08-31)
-now advance temporal-ranking design and second-source investigation in parallel,
-with deployment on hold. Comparison period, unobserved-entry treatment, and the
-follow-up display are not yet approved; this note authorizes no ranking change.
+now place temporal-list implementation and second-source expansion in parallel
+under Phase 3, starting with design and the already-assigned source investigation.
+Deployment moves to Phase 4. Comparison period, unobserved-entry treatment, and
+the follow-up display are not yet approved; this note authorizes no ranking change.
 
 ## Purpose and decision
 
@@ -27,8 +28,9 @@ not reuse the two 30-day averages or growth Ranking B as a daily result. This
 is an explicit product choice to show popularity, not a finding that growth is
 unhelpful. Keep the historical experiments and their artifacts intact.
 
-Phase 2 ends at a usable local page. Automatic collection, public deployment,
-and daily refresh remain Phase 3 work.
+Phase 2 ends at a usable local page. Under the revised roadmap, public deployment
+and daily page refresh are Phase 4 work. Any source-specific capture needed to
+build history is separately designed within Phase 3.
 
 ## Chosen approach
 
@@ -172,8 +174,9 @@ not silently tune until it looks positive.
   hypothetical noise from sources not yet selected.
 - **Additional sources and shared processing:** keep each source's identities
   and semantics separate until a second implemented source demonstrates reuse.
-- **Collection scheduling, stale-refresh alerts, and hosting:** Phase 3; Phase 2
-  does not promise an automatically current page.
+- **Daily publication, stale-refresh alerts, and hosting:** Phase 4; Phase 2
+  does not promise an automatically current page. Source-specific history
+  capture, if needed, is a separate Phase 3 decision.
 - **Keyword history and why-it-is-popular explanations:** later detail work;
   neither is necessary to complete the current list.
 

@@ -1,7 +1,7 @@
 # Trend Signal Lab Product Roadmap Design
 
 **Date:** 2026-08-30
-**Status:** Approved roadmap; priorities revised with the user on 2026-08-31
+**Status:** Approved roadmap; phase sequence revised with the user on 2026-08-31
 
 ## Purpose
 
@@ -11,8 +11,9 @@ decision it must enable, and what evidence permits the next phase to begin.
 
 It is deliberately not a backlog for the whole product. Later task lists would
 encode assumptions that have not yet been tested. Only explicitly active work
-gets a detailed plan. Phase numbers are stable references, not an obligation to
-execute every phase serially; the current priorities below govern sequencing.
+gets a detailed plan. Phase numbers describe the current intended sequence;
+bounded tasks within a phase may run in parallel. The mapping below preserves
+references to the earlier sequence without rewriting implementation history.
 
 ## Current evidence and stage transition
 
@@ -71,8 +72,9 @@ Three broad sequences were considered:
 
 1. **Vertical slice first — selected, sequence revised.** Keep one source's
    usable local path, address observed ranking and coverage limits, then publish
-   when the user accepts the list's purpose and limitations. A second-source
-   investigation need not wait for deployment or keyword detail.
+   when the user accepts the list's purpose and limitations. Second-source
+   collection and source-local output now belong to the same phase as temporal
+   ranking, not an indefinitely deferred investigation.
 2. **Data platform first — rejected for now.** A generic multi-source pipeline
    would be tidy but would freeze abstractions before a second source and user
    need prove them necessary.
@@ -92,24 +94,31 @@ uses no previous-period comparison. A working data-to-page path is useful
 engineering progress, not acceptance that its list is the intended product.
 Preserve the page, collector, and historical outputs rather than restarting.
 
-Two bounded workstreams may now proceed independently:
+**Active: Phase 3 — Expand inputs and build the core list.** The user wants
+targets receiving more attention than usual, not merely more than yesterday.
+Two bounded workstreams proceed independently:
 
-- **List refinement design (Phase 2 follow-up):** define how daily interest is
+- **Temporal list (workstream A):** define how daily interest is
   compared with a preceding baseline and how unobserved historical top-list
   entries are handled. Reuse the existing B approach where its assumptions fit;
   do not equate top-list absence with zero actual views. Keep A as a reference
-  rather than declaring sustained popularity irrelevant. The comparison period,
-  missing-observation policy, and final presentation still require approval.
-- **Second-source investigation (Phase 5 discovery only):** reuse prior research,
-  assess complementary coverage, and inspect a small permitted sample from one
-  promising candidate. This is not approval for a collector, source fusion, or
-  a generic ingestion platform. No particular candidate has been selected.
+  rather than declaring sustained popularity irrelevant. After approval of the
+  comparison period, missing-observation policy, and presentation, implement the
+  comparison and connect it to the existing local page.
+- **Second source (workstream B):** use the already-running bounded investigation
+  to select a candidate. After source-specific permission and design approval,
+  implement minimal collection, replayable storage, and source-local output.
+  Expansion does not wait for Wikimedia ranking to be finished. No candidate
+  has been selected, and no universal processing or score fusion is approved.
 
-Phase 3 public deployment and page auto-refresh are on hold. Phase 4 detail is
-not a prerequisite for these workstreams; Phases 6 and 7 remain later outcomes.
-Reconsider deployment after inspecting an actual list whose purpose and limits
-the user accepts, or if the user explicitly chooses an earlier limited release.
-Neither a perfect top 20 nor a mandatory number of sources is an exit gate.
+Phase 4 public deployment and page auto-refresh follow the Phase 3 review, not
+the mere existence of the Phase 2 page. Phase 5 detail is not a prerequisite;
+Phases 5–7 remain provisional later directions. Phase 3 aims to review actual
+temporal and expanded-source outputs and decide a release scope. A perfect
+top 20 is not required. If a source is unsuitable, explicitly choose an
+alternative, stop, or revise scope with the user; do not silently defer its
+implementation or keep investigating indefinitely. A one-source release needs
+an explicit scope decision, not an assumption that expansion was optional.
 
 Source expansion need not wait for a finished Process. A sufficient starting
 point is understood measurement semantics, replayable records, known collection
@@ -128,8 +137,23 @@ be backfilled, report whether a small periodic capture is needed to avoid losing
 future history. That collection decision is separate from page auto-refresh
 and requires approval before implementation.
 
-The two handoff prompts below prepare decisions, not runtime changes. Detailed
-implementation plans follow only after the relevant design/source approval.
+The existing handoff prompts are the design and research entry tasks of Phase 3,
+not its entire scope. The research task is already assigned externally; do not
+duplicate it or broaden its read-only mandate. Detailed implementation plans
+follow the relevant design/source approval within this same phase.
+
+### Numbering transition
+
+| Earlier reference | Current placement |
+|---|---|
+| Phase 1 signal acceptance | Phase 1, unchanged historical scope |
+| Phase 2 local page | Phase 2, implemented baseline; not product acceptance |
+| Phase 2 ranking follow-up + Phase 5 second source | Phase 3, parallel implementation paths after their designs are approved |
+| Phase 3 publication | Phase 4 |
+| Phase 4 keyword detail | Phase 5, provisional |
+| Phase 6 synthesis / Phase 7 interpretation | Phases 6 / 7, provisional |
+
+Earlier plans and dated experiment entries retain their historical meaning.
 
 ## Phase map
 
@@ -183,10 +207,10 @@ approved the written spec; its linked implementation plan defines the two
 sequential tasks. Track execution there and daily-output acceptance in the
 experiment log, separately from design approval.
 
-**Current follow-up:** The daily-view implementation remains a baseline. The
-current-priorities section now advances temporal-ranking design before treating
-the list as ready for public release; it does not retroactively change what the
-original implementation was asked to do.
+**Current follow-up:** The daily-view implementation remains a baseline.
+Phase 3 owns the temporal-list and source-expansion work; this does not
+retroactively change what the original implementation was asked to do or mark
+its pending human product-acceptance gate as passed.
 
 **Exit evidence:** A user can open the page, understand what is current, and
 judge whether browsing the list is interesting. The generation path is
@@ -195,10 +219,92 @@ repeatable from retained input without manual data editing.
 **Stop or revise when:** the list is not understandable outside the research
 report, or the UI requires a product contract that Phase 1 did not establish.
 
-### Phase 3 — Publish and refresh daily
+### Phase 3 — Expand inputs and build the core list
 
-**Sequencing:** On hold under the current priorities; not the automatic next
-step after a technically working Phase 2 page.
+**Purpose:** Address two distinct limitations before deciding what to release:
+Wikimedia-only coverage and a page that shows absolute views without the
+above-usual interest signal the user wants. Neither problem must be completely
+solved before work on the other begins.
+
+**Smallest outputs, in parallel:**
+
+- **A — Temporal list:** choose a preceding baseline and an honest policy for
+  unobserved page-days, implement source-local comparison, and show its result
+  through the existing local page while preserving popularity as a reference.
+- **B — Source expansion:** select one permitted complementary source, implement
+  its smallest collector and replayable storage, and generate an interpretable
+  source-local result for comparison alongside Wikimedia. Reuse processing only
+  where measurement semantics match; do not copy a views-based score onto text
+  mentions or combine incomparable scores.
+
+**Exit evidence:** The user inspects both actual outputs, can understand the
+temporal list's meaning and limits, and can judge what the second source adds.
+Source identity, event time, acquisition rights, replay, and failure behavior
+are explicit. Close the phase with a release-scope decision, not a claim of
+perfect ranking or culture-wide coverage.
+
+**Stop or revise when:** the available observations cannot support the promised
+comparison, the candidate adds no distinct information, or source conditions
+prevent the intended use. Resolve that specific issue or obtain an explicit
+scope revision; do not make research or quality tuning an endless gate.
+
+**Not approved by this phase heading:** a particular source, comparison window,
+new collector contract, unified score, generic ingestion platform, or deployment.
+Approve the small source/ranking designs before their implementation tasks.
+
+#### Workstream A proposal — pending user approval
+
+The [2026-08-31 feasibility check](../../experiment-log.md#phase-3-input-feasibility-and-sequence-revision--2026-08-31)
+found complete preceding 28-day observations for only 197 of the latest day's
+990 eligible candidates. Checking seven days instead retains 362. Neither
+window is an approved parameter, and this is not a ranking-quality comparison.
+
+Two data approaches are available:
+
+1. **Recommended: supplement candidate history.** Keep the selected completed
+   day's top-page list as the candidate pool, then retrieve those page titles'
+   daily history from Wikimedia's per-article API. Two small live probes returned
+   complete histories, including a title absent from all prior top lists. This
+   adds a source-specific collection step but retains emerging candidates.
+2. **Offline-only restriction.** Compare only candidates observed on every
+   required day and explicitly mark others as unrankable. This needs no new
+   collection but disproportionately excludes newly appearing top-list titles,
+   which works against the discovery purpose. Averaging only observed days is
+   also not an estimate of an ordinary day; it selects their high-view days.
+
+The proposed initial calculation is one completed UTC day's views compared
+with the arithmetic mean of its preceding 28 days, excluding the target day.
+Four weeks is a simple initial definition of usual, not a validated optimal
+window or weekday adjustment. A shorter seven-day baseline adapts faster but
+also absorbs a recent rise faster; no EWMA or momentum model is needed yet.
+Retain the existing 1-view smoothing in B:
+`log2((current_views + 1) / (prior_mean_views + 1))`. This is a smoothed comparison,
+not a forecast or an exact percentage growth claim; low baselines can still
+dominate it. Display current views and the actual preceding mean alongside it.
+Keep the existing daily-popularity list as the reference; propose a separate
+above-usual list for scores greater than zero, at most 20 items, rather than
+combining the two meanings into one score.
+
+History collection must preserve title/project/access/agent/date and provenance,
+be replayable, and stay separate from accepted top snapshots. `all-access/user`
+matched retained target-day counts in both probes, not a guarantee for every
+page. Missing rows, HTTP failures, and explicit zero counts are distinct; only
+explicit counts can enter a mean. Incomplete histories have no comparison score.
+Consider all eligible top-list candidates before selecting the comparison top
+20, not just the existing popularity top 20. The initial candidate pool still
+cannot discover a page outside that day's top list.
+
+Before implementation, approve the history-supplement approach, window, and
+separate-list presentation, then specify the small collector/output contract.
+Check the implemented result on fixed retained dates and inspect elevated
+plateaus, spikes, low baselines, and missing-history cases without tuning the
+definition after seeing which names rank. No bulk history collection, code,
+new scoring parameters, or final product acceptance is authorized by this draft.
+
+### Phase 4 — Publish and refresh daily
+
+**Sequencing:** After the Phase 3 output review and release-scope decision;
+deployment is not currently authorized.
 
 **Purpose:** Turn the local slice into a real product and observe operational
 failures that a local demonstration cannot reveal.
@@ -215,7 +321,7 @@ noticed and safely replayed.
 orchestration, and production databases remain unnecessary until the single
 daily job demonstrates a concrete limit.
 
-### Phase 4 — Add a keyword detail experience
+### Phase 5 — Add a keyword detail experience
 
 **Purpose:** Learn whether opening one item provides additional value beyond
 the list.
@@ -230,25 +336,6 @@ source evidence actually supports that claim.
 **Exit evidence:** Users can answer a concrete question from the detail view
 that the list alone cannot answer, such as whether attention is persistent or a
 short spike.
-
-### Phase 5 — Add a second source without fusion
-
-**Sequencing:** Candidate research and a bounded permitted sample may run in
-parallel with Phase 2 refinement, before Phases 3 and 4. Collector/ranking
-implementation requires a separate source-specific approval afterward.
-
-**Purpose:** Test whether another lens adds useful information and learn the
-first real cross-source boundary before designing a generic pipeline.
-
-**Smallest output:** A second source-local collector and ranking whose result is
-shown alongside Wikimedia. Raw records and incomparable scores remain separate.
-
-**Exit evidence:** The second source reveals useful candidates or context that
-Wikimedia misses, and its acquisition rights, event time, identity, replay, and
-failure behavior are explicit.
-
-**Stop or revise when:** the source adds volume but no distinct information, or
-its rights and operational assumptions cannot support a public product.
 
 ### Phase 6 — Synthesize source-local signals
 
@@ -330,8 +417,9 @@ reviewer when the task contract, evidence, and rollback boundary are clear.
 ### Handoff A — Daily temporal-ranking design
 
 Owner: main/product-design session. Runtime code and raw files are read-only;
-return a proposal for discussion, then update the Phase 2 design only after
-approval. Do not let this workstream edit the source-research owner's document.
+return a Phase 3 proposal for discussion and record it here, without rewriting
+the historical Phase 2 baseline contract. Do not let this workstream edit the
+source-research owner's document.
 
 ```text
 Trend Signal Lab의 기존 일별 화면에 관심 변화 B를 연결할 최소 설계를 검토해줘.
@@ -354,6 +442,8 @@ Owner: one low-cost researcher (Luna if delegated here). May append dated findin
 only to `docs/superpowers/specs/2026-08-30-public-culture-source-research.md`;
 no runtime/roadmap edits.
 Final product and source-permission decisions remain with the main session/user.
+This is the already-assigned research entry task of Phase 3 workstream B; its
+scope is unchanged. Candidate selection and implementation follow its results.
 
 ```text
 Trend Signal Lab에서 위키백과가 놓치는 정보를 줄 두 번째 소스를 조사해줘.

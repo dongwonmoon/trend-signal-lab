@@ -387,3 +387,83 @@ whereas prematurely fixing the product output would make them harder.
   data or requiring final Process quality first. The [roadmap](superpowers/specs/2026-08-30-product-roadmap-design.md)
   owns the revised priorities and two handoff prompts. This decision update
   makes no code change and performs no new source collection.
+
+## Phase 3 input feasibility and sequence revision — 2026-08-31
+
+### Accepted sequence, not a ranking-method approval
+
+The user approved making input expansion and the temporal list parallel
+implementation goals of a new Phase 3. The former publication phase becomes
+Phase 4 and detail becomes provisional Phase 5; Phases 1–2 remain historical
+scopes, and Phases 6–7 remain provisional synthesis/interpretation directions.
+The already-assigned source investigation keeps its original bounded mandate.
+Source adoption, its collector design, and Wikimedia ranking parameters still
+require their respective decisions. Source implementation must not be silently
+deferred until ranking is finished. The roadmap owns the updated sequence.
+
+### Read-only retained-input observation
+
+- Loaded all 60 files in `data/raw/wikimedia/ko.wikipedia.org/` through the
+  existing `build_wikimedia_page.load_snapshot` validator. Dates are July 1
+  through August 29, with no missing dates; files contain 982–1,000 rows.
+- The latest retained day, August 29, has 990 candidates after the existing
+  three-prefix exclusion. Checked each title's membership on every preceding
+  date; did not fill missing page-days or generate a new ranking.
+- Seven and 28 days are diagnostic examples, not approved windows or competing
+  algorithms judged by output quality:
+
+| Preceding interval | Complete histories | Partial histories | Never observed | Complete among current popularity top 20 |
+|---|---:|---:|---:|---:|
+| August 22–28 (7 days) | 362 | 479 | 149 | 10 |
+| August 1–28 (28 days) | 197 | 692 | 101 | 8 |
+
+Thus a full-history-only comparison would exclude most of the current candidate
+pool. This is a coverage fact, not proof of what a completed temporal ranking
+will look like. Existing Phase 1 `aggregate` divides observed sums by all days
+in a window, and `rank_increased` uses zero for absent names. Those historical
+methods cannot be relabeled as actual prior-mean page views for missing titles.
+
+### Official API check and two live probes
+
+Checked the [official page-view reference](https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/reference/page-views.html)
+and its linked [API schema](https://wikimedia.org/api/rest_v1/metrics/pageviews/api-spec.json):
+the per-article endpoint returns a page's time series with explicit project,
+access, agent, granularity, and inclusive dates. The
+[access policy](https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/documentation/access-policy.html)
+states CC0 data licensing, identifying User-Agent requirements, and recommends
+sequential requests. This is not a new permission decision for another source.
+
+Made two sequential, memory-only requests with the existing identifying
+User-Agent; no raw files or collector code were created. Each request used:
+
+`https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/ko.wikipedia.org/all-access/user/{URL-encoded-title}/daily/2026080100/2026082900`
+
+Both returned HTTP 200 with 29 distinct expected daily timestamps, valid identity
+fields, and nonnegative integer views. The August 29 count matched the retained
+top-list count in both cases.
+
+| Page | Prior top-list presence (28 days) | API prior daily range | API prior sum / 28 | August 29 views |
+|---|---:|---:|---:|---:|
+| 리센느 | 28 | 1,012–7,252 | 63,319 / 28 = 2,261.392857 | 1,512 |
+| 이용주_(배우) | 0 | 3–18 | 264 / 28 = 9.428571 | 6,235 |
+
+Response SHA-256 values, for this retrieval only (bodies not retained):
+
+- 리센느: `ff6e40946f3686f6e367a245f57a7f2a5412959acab813f1c93068d9f0bb6765`
+- 이용주_(배우): `f9a78359d3b558d98f0f3f0b36dfa67910dc766f6429b3fba99d30dcf2a83259`
+
+The second probe directly demonstrates why absence from the top list is not
+zero views. Two probes establish a feasible supplementation path, not full
+candidate coverage, performance, or long-term API consistency. These observations
+are repeatable by requesting the stated titles/range, but upstream responses
+can change; the hashes do not substitute for retained replay inputs.
+
+### Proposed next decision and limits
+
+Prefer supplementing candidate histories over limiting comparison to repeatedly
+top-listed titles. The roadmap records the pending 28-day-mean/simple-B proposal
+and its alternative; no runtime implementation or mass backfill was performed.
+Per-article collection would require its own validated, retained input contract.
+The top-list candidate-selection limit and small-baseline sensitivity would
+remain even after supplementation. The observed counts do not justify score
+tuning, a final usefulness claim, or source fusion.
